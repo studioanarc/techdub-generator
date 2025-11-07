@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dub Techno Dark Theme Colors -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Dark backgrounds -->
+    <color name="bg_dark">#FF0A0A0A</color>
+    <color name="surface_dark">#FF1A1A1A</color>
+
+    <!-- Neon cyan accent -->
+    <color name="neon_cyan">#FF00FF88</color>
+    <color name="neon_cyan_dim">#8000FF88</color>
+
+    <!-- Gray shades -->
+    <color name="gray_light">#FF888888</color>
+    <color name="gray_medium">#FF666666</color>
+    <color name="gray_dark">#FF333333</color>
+
+    <!-- Alert colors -->
+    <color name="red">#FFFF4444</color>
+</resources>

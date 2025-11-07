@@ -1,0 +1,53 @@
+{
+  "name": "Dark Minimal",
+  "author": "Factory",
+  "version": "1.0",
+  "description": "Sparse, deep bass, long reverb - perfect for minimal dub techno",
+  "generator": {
+    "root": "C2",
+    "scale": ["C", "D", "Eb", "F", "G", "Ab", "Bb"],
+    "tempo": 120,
+    "density": {
+      "bass": 0.6,
+      "pad": 0.2,
+      "stab": 0.1,
+      "kick": 1.0,
+      "hat": 0.4,
+      "noise": 0.15
+    },
+    "chaos": 0.2,
+    "evolution": 0.3
+  },
+  "effects": {
+    "delay": {
+      "time": 0.375,
+      "feedback": 0.6,
+      "wet": 0.5
+    },
+    "reverb": {
+      "decay": 6.0,
+      "wet": 0.4,
+      "preDelay": 0.02
+    },
+    "filter": {
+      "frequency": 3000,
+      "Q": 1,
+      "type": "lowpass"
+    },
+    "distortion": {
+      "amount": 0.1,
+      "wet": 0.1
+    }
+  },
+  "synths": {
+    "bass": {
+      "filterCutoff": 250,
+      "filterQ": 2,
+      "attack": 0.05,
+      "decay": 0.4,
+      "sustain": 0.3,
+      "release": 1.5
+    },
+    "masterVolume": -6
+  }
+}

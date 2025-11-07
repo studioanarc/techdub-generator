@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Dub Techno Generator</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+    <string name="play">Play</string>
+    <string name="randomize">Randomize</string>
+    <string name="frequency">Frequency</string>
+    <string name="volume">Volume</string>
+    <string name="status">Status</string>
+    <string name="playing">Playing</string>
+    <string name="stopped">Stopped</string>
+
+    <!-- Tabs -->
+    <string name="tab_generative">Generative</string>
+    <string name="tab_synths">Synths</string>
+    <string name="tab_effects">Effects</string>
+    <string name="tab_presets">Presets</string>
+
+    <!-- Settings -->
+    <string name="settings">Settings</string>
+    <string name="info">Info</string>
+
+    <!-- Presets -->
+    <string name="save_preset">Save Preset</string>
+    <string name="load_preset">Load Preset</string>
+    <string name="delete_preset">Delete Preset</string>
+    <string name="export_preset">Export Preset</string>
+    <string name="import_preset">Import Preset</string>
+
+    <!-- Messages -->
+    <string name="audio_permission_required">Audio permission is required</string>
+    <string name="preset_saved">Preset saved</string>
+    <string name="preset_loaded">Preset loaded</string>
+</resources>

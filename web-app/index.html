@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dub Techno Generator - Professional Generative Music Tool</title>
+  <meta name="description" content="Create infinite dub techno tracks with this generative music web application">
+
+  <!-- Tone.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <h1 class="logo">DUB TECHNO GENERATOR</h1>
+      <div class="header-controls">
+        <button id="play-btn" class="btn btn-primary">Play</button>
+        <button id="stop-btn" class="btn btn-secondary">Stop</button>
+        <button id="randomize-btn" class="btn btn-accent">Randomize</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="container">
+    <!-- Left Panel - Controls -->
+    <aside class="controls-panel">
+      <!-- Tab Navigation -->
+      <nav class="tabs">
+        <button class="tab-btn active" data-tab="generator">Generator</button>
+        <button class="tab-btn" data-tab="effects">Effects</button>
+        <button class="tab-btn" data-tab="presets">Presets</button>
+        <button class="tab-btn" data-tab="export">Export</button>
+      </nav>
+
+      <!-- Tab Contents -->
+      <div class="tab-contents">
+        <!-- Generator Tab -->
+        <div id="generator-tab" class="tab-content active">
+          <section class="control-section">
+            <h2>Musical Parameters</h2>
+
+            <div class="control-group">
+              <label for="tempo">
+                Tempo (BPM)
+                <span id="tempo-value" class="value-display">120</span>
+              </label>
+              <input type="range" id="tempo" min="80" max="160" step="1" value="120">
+              <button id="tap-tempo-btn" class="btn-small">Tap Tempo</button>
+            </div>
+
+            <div class="control-group">
+              <label for="scale">Scale</label>
+              <select id="scale">
+                <option value="minor">Minor (Natural)</option>
+                <option value="dorian">Dorian</option>
+                <option value="phrygian">Phrygian</option>
+                <option value="major">Major</option>
+                <option value="minor-pentatonic">Minor Pentatonic</option>
+                <option value="blues">Blues</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label for="chaos">
+                Chaos
+                <span id="chaos-value" class="value-display">0.30</span>
+              </label>
+              <input type="range" id="chaos" min="0" max="1" step="0.01" value="0.3">
+            </div>
+          </section>
+
+          <section class="control-section">
+            <h2>Density Controls</h2>
+
+            <div class="control-group">
+              <label for="kick-density">
+                Kick
+                <span id="kick-density-value" class="value-display">1.00</span>
+              </label>
+              <input type="range" id="kick-density" min="0" max="1" step="0.01" value="1.0">
+            </div>
+
+            <div class="control-group">
+              <label for="bass-density">
+                Bass
+                <span id="bass-density-value" class="value-display">0.70</span>
+              </label>
+              <input type="range" id="bass-density" min="0" max="1" step="0.01" value="0.7">
+            </div>
+
+            <div class="control-group">
+              <label for="pad-density">
+                Pad
+                <span id="pad-density-value" class="value-display">0.30</span>
+              </label>
+              <input type="range" id="pad-density" min="0" max="1" step="0.01" value="0.3">
+            </div>
+
+            <div class="control-group">
+              <label for="stab-density">
+                Stab
+                <span id="stab-density-value" class="value-display">0.40</span>
+              </label>
+              <input type="range" id="stab-density" min="0" max="1" step="0.01" value="0.4">
+            </div>
+
+            <div class="control-group">
+              <label for="hat-density">
+                Hi-Hat
+                <span id="hat-density-value" class="value-display">0.60</span>
+              </label>
+              <input type="range" id="hat-density" min="0" max="1" step="0.01" value="0.6">
+            </div>
+          </section>
+
+          <section class="control-section">
+            <h2>Master</h2>
+
+            <div class="control-group">
+              <label for="master-volume">
+                Volume (dB)
+                <span id="master-volume-value" class="value-display">-6</span>
+              </label>
+              <input type="range" id="master-volume" min="-40" max="0" step="1" value="-6">
+            </div>
+          </section>
+
+          <!-- Advanced Mode Toggle -->
+          <div class="control-section">
+            <label class="checkbox-label">
+              <input type="checkbox" id="advanced-toggle">
+              Advanced Mode
+            </label>
+          </div>
+
+          <!-- Advanced Panel (Hidden by default) -->
+          <div id="advanced-panel" style="display: none;">
+            <section class="control-section">
+              <h2>Advanced Synth Controls</h2>
+              <p class="info-text">Coming soon: Per-synth parameter controls</p>
+            </section>
+          </div>
+        </div>
+
+        <!-- Effects Tab -->
+        <div id="effects-tab" class="tab-content">
+          <section class="control-section">
+            <h2>Delay</h2>
+
+            <div class="control-group">
+              <label for="delay-feedback">
+                Feedback
+                <span id="delay-feedback-value" class="value-display">0.50</span>
+              </label>
+              <input type="range" id="delay-feedback" min="0" max="0.95" step="0.01" value="0.5">
+            </div>
+
+            <div class="control-group">
+              <label for="delay-wet">
+                Wet
+                <span id="delay-wet-value" class="value-display">0.40</span>
+              </label>
+              <input type="range" id="delay-wet" min="0" max="1" step="0.01" value="0.4">
+            </div>
+          </section>
+
+          <section class="control-section">
+            <h2>Reverb</h2>
+
+            <div class="control-group">
+              <label for="reverb-decay">
+                Decay (s)
+                <span id="reverb-decay-value" class="value-display">4.00</span>
+              </label>
+              <input type="range" id="reverb-decay" min="0.1" max="10" step="0.1" value="4.0">
+            </div>
+
+            <div class="control-group">
+              <label for="reverb-wet">
+                Wet
+                <span id="reverb-wet-value" class="value-display">0.30</span>
+              </label>
+              <input type="range" id="reverb-wet" min="0" max="1" step="0.01" value="0.3">
+            </div>
+          </section>
+
+          <section class="control-section">
+            <h2>Filter</h2>
+
+            <div class="control-group">
+              <label for="filter-cutoff">
+                Cutoff (Hz)
+                <span id="filter-cutoff-value" class="value-display">5000</span>
+              </label>
+              <input type="range" id="filter-cutoff" min="200" max="10000" step="10" value="5000">
+            </div>
+          </section>
+
+          <section class="control-section">
+            <h2>Distortion</h2>
+
+            <div class="control-group">
+              <label for="distortion-amount">
+                Amount
+                <span id="distortion-amount-value" class="value-display">0.20</span>
+              </label>
+              <input type="range" id="distortion-amount" min="0" max="1" step="0.01" value="0.2">
+            </div>
+          </section>
+        </div>
+
+        <!-- Presets Tab -->
+        <div id="presets-tab" class="tab-content">
+          <section class="control-section">
+            <h2>Factory Presets</h2>
+            <div id="factory-presets" class="preset-grid">
+              <!-- Populated by JavaScript -->
+            </div>
+          </section>
+
+          <section class="control-section">
+            <h2>User Presets</h2>
+            <div class="button-group">
+              <button id="save-preset-btn" class="btn btn-secondary">Save Preset</button>
+              <button id="load-preset-btn" class="btn btn-secondary">Load Preset</button>
+            </div>
+          </section>
+
+          <section class="control-section">
+            <h2>Import/Export</h2>
+            <div class="button-group">
+              <button id="export-preset-btn" class="btn btn-secondary">Export Preset</button>
+              <button id="import-preset-btn" class="btn btn-secondary">Import Preset</button>
+            </div>
+            <input type="file" id="preset-file-input" accept=".json" style="display: none;">
+          </section>
+        </div>
+
+        <!-- Export Tab -->
+        <div id="export-tab" class="tab-content">
+          <section class="control-section">
+            <h2>Export Audio</h2>
+
+            <p class="info-text">
+              Export your current composition as a high-quality WAV file.
+              This will render the audio offline for perfect quality.
+            </p>
+
+            <div class="button-group">
+              <button id="export-btn" class="btn btn-accent">Export Audio</button>
+            </div>
+
+            <progress id="export-progress" value="0" max="100" style="display: none;"></progress>
+          </section>
+
+          <section class="control-section">
+            <h2>Export Options</h2>
+            <p class="info-text">
+              When you click Export, you'll be prompted to choose the duration.
+              Default is 60 seconds. Format: 16-bit WAV at 48kHz.
+            </p>
+          </section>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Right Panel - Visualizer -->
+    <main class="visualizer-panel">
+      <div class="visualizer-container">
+        <canvas id="visualizer"></canvas>
+      </div>
+
+      <!-- Info Bar -->
+      <div class="info-bar">
+        <div class="info-item">
+          <span class="info-label">Status:</span>
+          <span id="status-text">Ready</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Shortcuts:</span>
+          <span class="info-text-small">Space: Play/Stop | R: Randomize | Ctrl+Z: Undo | Ctrl+S: Save</span>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="notification" class="notification"></div>
+
+  <!-- Scripts -->
+  <script src="synths.js"></script>
+  <script src="effects.js"></script>
+  <script src="generators.js"></script>
+  <script src="visualizer.js"></script>
+  <script src="presets.js"></script>
+  <script src="export.js"></script>
+  <script src="ui.js"></script>
+</body>
+</html>

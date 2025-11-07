@@ -1,0 +1,53 @@
+{
+  "name": "Andy Stott",
+  "author": "Factory",
+  "version": "1.0",
+  "description": "Lo-fi, tape saturation, slow evolution - textured and gritty",
+  "generator": {
+    "root": "C2",
+    "scale": ["C", "D", "Eb", "F", "G", "A", "Bb"],
+    "tempo": 112,
+    "density": {
+      "bass": 0.8,
+      "pad": 0.5,
+      "stab": 0.4,
+      "kick": 1.0,
+      "hat": 0.6,
+      "noise": 0.3
+    },
+    "chaos": 0.25,
+    "evolution": 0.4
+  },
+  "effects": {
+    "delay": {
+      "time": 0.333,
+      "feedback": 0.5,
+      "wet": 0.4
+    },
+    "reverb": {
+      "decay": 3.5,
+      "wet": 0.3,
+      "preDelay": 0.01
+    },
+    "filter": {
+      "frequency": 2500,
+      "Q": 2,
+      "type": "lowpass"
+    },
+    "distortion": {
+      "amount": 0.4,
+      "wet": 0.3
+    }
+  },
+  "synths": {
+    "bass": {
+      "filterCutoff": 350,
+      "filterQ": 3,
+      "attack": 0.08,
+      "decay": 0.4,
+      "sustain": 0.5,
+      "release": 1.8
+    },
+    "masterVolume": -5
+  }
+}

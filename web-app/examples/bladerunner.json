@@ -1,0 +1,53 @@
+{
+  "name": "Bladerunner",
+  "author": "Factory",
+  "version": "1.0",
+  "description": "Johannsson-inspired, atmospheric, FM-heavy - cinematic dub",
+  "generator": {
+    "root": "C2",
+    "scale": ["C", "D", "E", "F", "G", "A", "B"],
+    "tempo": 115,
+    "density": {
+      "bass": 0.5,
+      "pad": 0.8,
+      "stab": 0.3,
+      "kick": 0.7,
+      "hat": 0.3,
+      "noise": 0.5
+    },
+    "chaos": 0.3,
+    "evolution": 0.6
+  },
+  "effects": {
+    "delay": {
+      "time": 0.5,
+      "feedback": 0.7,
+      "wet": 0.6
+    },
+    "reverb": {
+      "decay": 8.0,
+      "wet": 0.5,
+      "preDelay": 0.05
+    },
+    "filter": {
+      "frequency": 6000,
+      "Q": 0.5,
+      "type": "lowpass"
+    },
+    "distortion": {
+      "amount": 0.2,
+      "wet": 0.15
+    }
+  },
+  "synths": {
+    "bass": {
+      "filterCutoff": 300,
+      "filterQ": 1.5,
+      "attack": 0.1,
+      "decay": 0.5,
+      "sustain": 0.6,
+      "release": 2.0
+    },
+    "masterVolume": -8
+  }
+}

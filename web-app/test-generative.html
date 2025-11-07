@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dub Techno Generative Algorithm Tester</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #00ff88;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 0 0 20px #00ff88;
+        }
+
+        .section {
+            background: rgba(0, 255, 136, 0.05);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            color: #00ffff;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #00ff88;
+            padding-bottom: 10px;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background: #00ff88;
+            color: #1a1a2e;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #00ffff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        input[type="range"] {
+            width: 200px;
+            margin: 0 10px;
+        }
+
+        .pattern-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 1.1em;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        .pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(16, 1fr);
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .step {
+            aspect-ratio: 1;
+            border: 1px solid #00ff88;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            transition: all 0.3s;
+        }
+
+        .step.active {
+            background: #00ff88;
+            color: #1a1a2e;
+            font-weight: bold;
+        }
+
+        .step.playing {
+            background: #00ffff;
+            transform: scale(1.2);
+            box-shadow: 0 0 15px #00ffff;
+        }
+
+        .stats {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .stats-item {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 5px;
+        }
+
+        .melody-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .note-item {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 2px;
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            border-radius: 3px;
+        }
+
+        .note-item.rest {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #666;
+            color: #666;
+        }
+
+        .label {
+            color: #00ffff;
+            margin-right: 10px;
+        }
+
+        #console {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+            font-size: 0.9em;
+            margin-top: 20px;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            opacity: 0.8;
+        }
+
+        .log-entry.new {
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 0.8; transform: translateX(0); }
+        }
+
+        .parameter-control {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .parameter-control label {
+            min-width: 150px;
+            color: #00ffff;
+        }
+
+        .parameter-control input {
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .parameter-control .value {
+            min-width: 60px;
+            text-align: right;
+            color: #00ff88;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 DUB TECHNO GENERATIVE ALGORITHM TESTER 🎵</h1>
+
+        <!-- Euclidean Rhythm Section -->
+        <div class="section">
+            <h2>🥁 Euclidean Rhythm Generator</h2>
+            <div class="controls">
+                <span class="label">Hits:</span>
+                <input type="number" id="euclidean-hits" value="4" min="0" max="16">
+                <span class="label">Steps:</span>
+                <input type="number" id="euclidean-steps" value="16" min="1" max="32">
+                <span class="label">Rotation:</span>
+                <input type="number" id="euclidean-rotation" value="0" min="0" max="16">
+                <button onclick="testEuclidean()">Generate Pattern</button>
+                <button onclick="testPresets()">Test Presets</button>
+            </div>
+            <div class="pattern-display" id="euclidean-visual"></div>
+            <div class="pattern-grid" id="euclidean-grid"></div>
+            <div class="stats" id="euclidean-stats"></div>
+        </div>
+
+        <!-- Markov Melody Section -->
+        <div class="section">
+            <h2>🎹 Markov Chain Melody Generator</h2>
+            <div class="controls">
+                <span class="label">Root:</span>
+                <select id="melody-root">
+                    <option value="C">C</option>
+                    <option value="C#">C#</option>
+                    <option value="D">D</option>
+                    <option value="D#">D#</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="F#">F#</option>
+                    <option value="G">G</option>
+                    <option value="G#">G#</option>
+                    <option value="A">A</option>
+                    <option value="A#">A#</option>
+                    <option value="B">B</option>
+                </select>
+                <span class="label">Scale:</span>
+                <select id="melody-scale">
+                    <option value="minor">Minor</option>
+                    <option value="dorian">Dorian</option>
+                    <option value="phrygian">Phrygian</option>
+                    <option value="minor_pentatonic">Minor Pentatonic</option>
+                    <option value="harmonic_minor">Harmonic Minor</option>
+                    <option value="whole_tone">Whole Tone</option>
+                </select>
+                <button onclick="testMelody()">Generate Melody</button>
+                <button onclick="testMelodyPresets()">Test Presets</button>
+            </div>
+
+            <div class="parameter-control">
+                <label>Density:</label>
+                <input type="range" id="melody-density" min="0" max="100" value="60" oninput="updateMelodyParam()">
+                <span class="value" id="melody-density-val">0.60</span>
+            </div>
+            <div class="parameter-control">
+                <label>Repetition:</label>
+                <input type="range" id="melody-repetition" min="0" max="100" value="50" oninput="updateMelodyParam()">
+                <span class="value" id="melody-repetition-val">0.50</span>
+            </div>
+            <div class="parameter-control">
+                <label>Stepwise Motion:</label>
+                <input type="range" id="melody-stepwise" min="0" max="100" value="70" oninput="updateMelodyParam()">
+                <span class="value" id="melody-stepwise-val">0.70</span>
+            </div>
+
+            <div class="melody-display" id="melody-notes"></div>
+            <div class="stats" id="melody-stats"></div>
+        </div>
+
+        <!-- Full Generative System Section -->
+        <div class="section">
+            <h2>🎛️ Full Dub Techno Generator</h2>
+            <div class="controls">
+                <button onclick="initGenerator()">Initialize</button>
+                <button onclick="playGenerator()" id="play-btn">▶ Play</button>
+                <button onclick="stopGenerator()">⏹ Stop</button>
+                <button onclick="evolveGenerator()">🧬 Evolve</button>
+                <button onclick="randomizeGenerator()">🎲 Randomize</button>
+            </div>
+
+            <div class="parameter-control">
+                <label>Tempo:</label>
+                <input type="range" id="gen-tempo" min="100" max="140" value="122" oninput="updateGenParam()">
+                <span class="value" id="gen-tempo-val">122 BPM</span>
+            </div>
+            <div class="parameter-control">
+                <label>Density:</label>
+                <input type="range" id="gen-density" min="0" max="100" value="60" oninput="updateGenParam()">
+                <span class="value" id="gen-density-val">0.60</span>
+            </div>
+            <div class="parameter-control">
+                <label>Chaos:</label>
+                <input type="range" id="gen-chaos" min="0" max="100" value="20" oninput="updateGenParam()">
+                <span class="value" id="gen-chaos-val">0.20</span>
+            </div>
+            <div class="parameter-control">
+                <label>Swing:</label>
+                <input type="range" id="gen-swing" min="0" max="100" value="30" oninput="updateGenParam()">
+                <span class="value" id="gen-swing-val">0.30</span>
+            </div>
+
+            <div id="pattern-displays">
+                <h3 style="color: #00ffff; margin-top: 20px;">Kick Pattern</h3>
+                <div class="pattern-grid" id="kick-grid"></div>
+
+                <h3 style="color: #00ffff; margin-top: 20px;">Snare Pattern</h3>
+                <div class="pattern-grid" id="snare-grid"></div>
+
+                <h3 style="color: #00ffff; margin-top: 20px;">Hi-Hat Pattern</h3>
+                <div class="pattern-grid" id="hihat-grid"></div>
+
+                <h3 style="color: #00ffff; margin-top: 20px;">Bass Pattern</h3>
+                <div class="melody-display" id="bass-notes"></div>
+
+                <h3 style="color: #00ffff; margin-top: 20px;">Melody Pattern</h3>
+                <div class="melody-display" id="generator-melody-notes"></div>
+            </div>
+
+            <div class="stats" id="generator-stats"></div>
+        </div>
+
+        <!-- Console Log -->
+        <div class="section">
+            <h2>📟 Console Log</h2>
+            <div id="console"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import modules
+        import {
+            generateEuclideanRhythm,
+            getDubRhythmPreset,
+            visualizePattern,
+            variatePattern
+        } from './euclidean.js';
+
+        import { MarkovMelodyGenerator } from './markov.js';
+        import { DubGenerator } from './generative.js';
+        import { SCALES } from './scales.js';
+
+        // Make functions globally available
+        window.euclidean = { generateEuclideanRhythm, getDubRhythmPreset, visualizePattern, variatePattern };
+        window.MarkovMelodyGenerator = MarkovMelodyGenerator;
+        window.DubGenerator = DubGenerator;
+
+        // Global state
+        let generator = null;
+        let melodyGen = null;
+        let synths = null;
+
+        // Console logging
+        function log(message, type = 'info') {
+            const console = document.getElementById('console');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry new';
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            console.insertBefore(entry, console.firstChild);
+
+            // Keep only last 50 entries
+            while (console.children.length > 50) {
+                console.removeChild(console.lastChild);
+            }
+
+            // Also log to browser console
+            console.log(message);
+        }
+
+        window.log = log;
+
+        // Test Euclidean Rhythms
+        window.testEuclidean = function() {
+            const hits = parseInt(document.getElementById('euclidean-hits').value);
+            const steps = parseInt(document.getElementById('euclidean-steps').value);
+            const rotation = parseInt(document.getElementById('euclidean-rotation').value);
+
+            log(`Generating E(${hits}, ${steps}, ${rotation})`);
+
+            const pattern = euclidean.generateEuclideanRhythm(hits, steps, rotation);
+            const visual = euclidean.visualizePattern(pattern);
+
+            document.getElementById('euclidean-visual').textContent = visual;
+
+            // Grid visualization
+            const grid = document.getElementById('euclidean-grid');
+            grid.innerHTML = '';
+            grid.style.gridTemplateColumns = `repeat(${steps}, 1fr)`;
+
+            pattern.forEach((hit, i) => {
+                const step = document.createElement('div');
+                step.className = 'step' + (hit ? ' active' : '');
+                step.textContent = i + 1;
+                grid.appendChild(step);
+            });
+
+            // Stats
+            const hitCount = pattern.filter(Boolean).length;
+            const density = (hitCount / steps * 100).toFixed(1);
+            document.getElementById('euclidean-stats').innerHTML = `
+                <span class="stats-item">Hits: ${hitCount}/${steps}</span>
+                <span class="stats-item">Density: ${density}%</span>
+                <span class="stats-item">Pattern: ${visual}</span>
+            `;
+
+            log(`Generated pattern with ${hitCount} hits (${density}% density)`);
+        };
+
+        window.testPresets = function() {
+            log('Testing dub techno rhythm presets...');
+
+            const instruments = ['kick', 'snare', 'hihat', 'perc'];
+            const feels = ['minimal', 'standard', 'busy'];
+
+            instruments.forEach(inst => {
+                feels.forEach(feel => {
+                    const preset = euclidean.getDubRhythmPreset(inst, feel);
+                    const pattern = euclidean.generateEuclideanRhythm(preset.hits, preset.steps, preset.rotation);
+                    const visual = euclidean.visualizePattern(pattern);
+                    log(`${inst.toUpperCase()} (${feel}): ${visual}`);
+                });
+            });
+        };
+
+        // Test Markov Melody
+        window.testMelody = function() {
+            const root = document.getElementById('melody-root').value;
+            const scale = document.getElementById('melody-scale').value;
+            const density = parseFloat(document.getElementById('melody-density').value) / 100;
+            const repetition = parseFloat(document.getElementById('melody-repetition').value) / 100;
+            const stepwise = parseFloat(document.getElementById('melody-stepwise').value) / 100;
+
+            log(`Generating melody: ${root} ${scale} (density: ${density.toFixed(2)})`);
+
+            melodyGen = new MarkovMelodyGenerator({
+                root: root,
+                scale: scale,
+                octave: 3,
+                octaves: 2,
+                density: density,
+                repetition: repetition,
+                stepwise: stepwise
+            });
+
+            const melody = melodyGen.generateMelody(16);
+
+            // Display melody
+            const display = document.getElementById('melody-notes');
+            display.innerHTML = '';
+
+            melody.forEach((note, i) => {
+                const item = document.createElement('span');
+                item.className = 'note-item' + (note === null ? ' rest' : '');
+                item.textContent = note ? note.name : '—';
+                display.appendChild(item);
+            });
+
+            // Stats
+            const stats = melodyGen.analyzeMelody(melody);
+            document.getElementById('melody-stats').innerHTML = `
+                <span class="stats-item">Notes: ${stats.noteCount}</span>
+                <span class="stats-item">Rests: ${stats.restCount}</span>
+                <span class="stats-item">Density: ${(stats.density * 100).toFixed(1)}%</span>
+                <span class="stats-item">Avg Interval: ${stats.averageInterval.toFixed(1)} semitones</span>
+                <span class="stats-item">Unique Notes: ${stats.uniqueNotes}</span>
+            `;
+
+            log(`Generated melody: ${stats.noteCount} notes, ${stats.restCount} rests`);
+        };
+
+        window.testMelodyPresets = function() {
+            log('Testing melody presets...');
+            const styles = ['minimal', 'standard', 'busy', 'ambient'];
+
+            styles.forEach(style => {
+                const preset = MarkovMelodyGenerator.getPreset(style);
+                log(`${style.toUpperCase()}: density=${preset.density}, repetition=${preset.repetition}, stepwise=${preset.stepwise}`);
+            });
+        };
+
+        window.updateMelodyParam = function() {
+            document.getElementById('melody-density-val').textContent =
+                (parseFloat(document.getElementById('melody-density').value) / 100).toFixed(2);
+            document.getElementById('melody-repetition-val').textContent =
+                (parseFloat(document.getElementById('melody-repetition').value) / 100).toFixed(2);
+            document.getElementById('melody-stepwise-val').textContent =
+                (parseFloat(document.getElementById('melody-stepwise').value) / 100).toFixed(2);
+        };
+
+        // Generator functions
+        window.initGenerator = async function() {
+            log('Initializing Dub Generator...');
+
+            // Create simple synths for testing
+            synths = {
+                kick: new Tone.MembraneSynth().toDestination(),
+                snare: new Tone.NoiseSynth({
+                    noise: { type: 'white' },
+                    envelope: { attack: 0.001, decay: 0.2 }
+                }).toDestination(),
+                hihat: new Tone.MetalSynth({
+                    frequency: 200,
+                    envelope: { attack: 0.001, decay: 0.1, release: 0.01 },
+                    volume: -20
+                }).toDestination(),
+                bass: new Tone.Synth({
+                    oscillator: { type: 'sawtooth' },
+                    envelope: { attack: 0.01, decay: 0.2, sustain: 0.5, release: 0.1 },
+                    volume: -10
+                }).toDestination(),
+                melody: new Tone.Synth({
+                    oscillator: { type: 'triangle' },
+                    envelope: { attack: 0.05, decay: 0.2, sustain: 0.3, release: 0.5 },
+                    volume: -15
+                }).toDestination()
+            };
+
+            generator = new DubGenerator({
+                tempo: 122,
+                rootNote: 'C',
+                scale: 'minor',
+                density: 0.6,
+                chaos: 0.2
+            });
+
+            displayGeneratorPatterns();
+            log('✅ Generator initialized!');
+        };
+
+        window.playGenerator = async function() {
+            if (!generator) {
+                log('⚠️ Initialize generator first!');
+                return;
+            }
+
+            log('▶️ Starting playback...');
+            await generator.startTransport(synths);
+            document.getElementById('play-btn').textContent = '⏸ Playing...';
+            document.getElementById('play-btn').style.background = '#ff0088';
+        };
+
+        window.stopGenerator = function() {
+            if (!generator) return;
+
+            generator.stop();
+            document.getElementById('play-btn').textContent = '▶ Play';
+            document.getElementById('play-btn').style.background = '';
+            log('⏹ Stopped');
+        };
+
+        window.evolveGenerator = function() {
+            if (!generator) return;
+
+            generator.evolve();
+            displayGeneratorPatterns();
+            log('🧬 Patterns evolved!');
+        };
+
+        window.randomizeGenerator = function() {
+            if (!generator) return;
+
+            generator.randomize();
+            displayGeneratorPatterns();
+            log('🎲 All patterns randomized!');
+        };
+
+        window.updateGenParam = function() {
+            const tempo = parseInt(document.getElementById('gen-tempo').value);
+            const density = parseFloat(document.getElementById('gen-density').value) / 100;
+            const chaos = parseFloat(document.getElementById('gen-chaos').value) / 100;
+            const swing = parseFloat(document.getElementById('gen-swing').value) / 100;
+
+            document.getElementById('gen-tempo-val').textContent = tempo + ' BPM';
+            document.getElementById('gen-density-val').textContent = density.toFixed(2);
+            document.getElementById('gen-chaos-val').textContent = chaos.toFixed(2);
+            document.getElementById('gen-swing-val').textContent = swing.toFixed(2);
+
+            if (generator) {
+                generator.updateParameters({ tempo, density, chaos, swingAmount: swing });
+                displayGeneratorPatterns();
+            }
+        };
+
+        function displayGeneratorPatterns() {
+            if (!generator || !generator.patterns) return;
+
+            // Display kick
+            displayRhythmGrid('kick-grid', generator.patterns.kick.rhythm);
+
+            // Display snare
+            displayRhythmGrid('snare-grid', generator.patterns.snare.rhythm);
+
+            // Display hihat
+            displayRhythmGrid('hihat-grid', generator.patterns.hihat.rhythm);
+
+            // Display bass
+            const bassDisplay = document.getElementById('bass-notes');
+            bassDisplay.innerHTML = '';
+            generator.patterns.bass.notes.forEach(note => {
+                const item = document.createElement('span');
+                item.className = 'note-item' + (note === null ? ' rest' : '');
+                item.textContent = note ? note.name : '—';
+                bassDisplay.appendChild(item);
+            });
+
+            // Display melody
+            const melodyDisplay = document.getElementById('generator-melody-notes');
+            melodyDisplay.innerHTML = '';
+            generator.patterns.melody.notes.forEach(note => {
+                const item = document.createElement('span');
+                item.className = 'note-item' + (note === null ? ' rest' : '');
+                item.textContent = note ? note.name : '—';
+                melodyDisplay.appendChild(item);
+            });
+
+            // Stats
+            const state = generator.getState();
+            document.getElementById('generator-stats').innerHTML = `
+                <span class="stats-item">Tempo: ${state.tempo} BPM</span>
+                <span class="stats-item">Key: ${state.rootNote} ${state.scale}</span>
+                <span class="stats-item">Bar: ${state.currentBar}</span>
+                <span class="stats-item">Density: ${(state.density * 100).toFixed(0)}%</span>
+                <span class="stats-item">Chaos: ${(state.chaos * 100).toFixed(0)}%</span>
+            `;
+        }
+
+        function displayRhythmGrid(elementId, rhythm) {
+            const grid = document.getElementById(elementId);
+            grid.innerHTML = '';
+
+            rhythm.forEach((hit, i) => {
+                const step = document.createElement('div');
+                step.className = 'step' + (hit ? ' active' : '');
+                step.textContent = i + 1;
+                grid.appendChild(step);
+            });
+        }
+
+        // Initialize on load
+        log('🎵 Dub Techno Generative Algorithm Tester Ready!');
+        log('Test individual algorithms or initialize the full generator.');
+        testEuclidean();
+    </script>
+</body>
+</html>

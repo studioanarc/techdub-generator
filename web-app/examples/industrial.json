@@ -1,0 +1,53 @@
+{
+  "name": "Industrial",
+  "author": "Factory",
+  "version": "1.0",
+  "description": "Distorted, bit-crushed, chaotic - aggressive industrial dub",
+  "generator": {
+    "root": "C2",
+    "scale": ["C", "Db", "Eb", "F", "G", "Ab", "Bb"],
+    "tempo": 128,
+    "density": {
+      "bass": 0.8,
+      "pad": 0.4,
+      "stab": 0.6,
+      "kick": 1.0,
+      "hat": 0.7,
+      "noise": 0.4
+    },
+    "chaos": 0.6,
+    "evolution": 0.7
+  },
+  "effects": {
+    "delay": {
+      "time": 0.25,
+      "feedback": 0.3,
+      "wet": 0.3
+    },
+    "reverb": {
+      "decay": 2.0,
+      "wet": 0.2,
+      "preDelay": 0.01
+    },
+    "filter": {
+      "frequency": 2000,
+      "Q": 4,
+      "type": "lowpass"
+    },
+    "distortion": {
+      "amount": 0.6,
+      "wet": 0.4
+    }
+  },
+  "synths": {
+    "bass": {
+      "filterCutoff": 400,
+      "filterQ": 4,
+      "attack": 0.01,
+      "decay": 0.2,
+      "sustain": 0.5,
+      "release": 0.8
+    },
+    "masterVolume": -3
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "name": "Rhythm & Sound",
+  "author": "Factory",
+  "version": "1.0",
+  "description": "Classic dub, heavy delay, simple patterns - traditional dub techno",
+  "generator": {
+    "root": "C2",
+    "scale": ["C", "Eb", "F", "G", "Bb"],
+    "tempo": 118,
+    "density": {
+      "bass": 0.7,
+      "pad": 0.3,
+      "stab": 0.2,
+      "kick": 1.0,
+      "hat": 0.5,
+      "noise": 0.2
+    },
+    "chaos": 0.15,
+    "evolution": 0.2
+  },
+  "effects": {
+    "delay": {
+      "time": 0.375,
+      "feedback": 0.8,
+      "wet": 0.7
+    },
+    "reverb": {
+      "decay": 5.0,
+      "wet": 0.35,
+      "preDelay": 0.02
+    },
+    "filter": {
+      "frequency": 4000,
+      "Q": 1,
+      "type": "lowpass"
+    },
+    "distortion": {
+      "amount": 0.15,
+      "wet": 0.2
+    }
+  },
+  "synths": {
+    "bass": {
+      "filterCutoff": 280,
+      "filterQ": 2.5,
+      "attack": 0.05,
+      "decay": 0.3,
+      "sustain": 0.4,
+      "release": 1.2
+    },
+    "masterVolume": -6
+  }
+}
