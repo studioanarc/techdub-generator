@@ -126,7 +126,153 @@ class DubTechnoUI {
       });
     }
 
-    // Effects parameters
+    // === EFFECT TOGGLES ===
+
+    // BitCrusher
+    const bitcrusherToggle = document.getElementById('bitcrusher-toggle');
+    if (bitcrusherToggle) {
+      bitcrusherToggle.addEventListener('change', (e) => {
+        if (this.effects) this.effects.setBitCrusherEnabled(e.target.checked);
+      });
+    }
+
+    // Distortion
+    const distortionToggle = document.getElementById('distortion-toggle');
+    if (distortionToggle) {
+      distortionToggle.addEventListener('change', (e) => {
+        if (this.effects) this.effects.setDistortionEnabled(e.target.checked);
+      });
+    }
+
+    // Chorus
+    const chorusToggle = document.getElementById('chorus-toggle');
+    if (chorusToggle) {
+      chorusToggle.addEventListener('change', (e) => {
+        if (this.effects) this.effects.setChorusEnabled(e.target.checked);
+      });
+    }
+
+    // Phaser
+    const phaserToggle = document.getElementById('phaser-toggle');
+    if (phaserToggle) {
+      phaserToggle.addEventListener('change', (e) => {
+        if (this.effects) this.effects.setPhaserEnabled(e.target.checked);
+      });
+    }
+
+    // Auto Filter
+    const filterToggle = document.getElementById('filter-toggle');
+    if (filterToggle) {
+      filterToggle.addEventListener('change', (e) => {
+        if (this.effects) this.effects.setFilterEnabled(e.target.checked);
+      });
+    }
+
+    // Tape Echo
+    const tapeEchoToggle = document.getElementById('tape-echo-toggle');
+    if (tapeEchoToggle) {
+      tapeEchoToggle.addEventListener('change', (e) => {
+        if (this.effects) this.effects.setTapeEchoEnabled(e.target.checked);
+      });
+    }
+
+    // Ping Pong Delay
+    const delayToggle = document.getElementById('delay-toggle');
+    if (delayToggle) {
+      delayToggle.addEventListener('change', (e) => {
+        if (this.effects) this.effects.setDelayEnabled(e.target.checked);
+      });
+    }
+
+    // Convolution Reverb
+    const convolutionReverbToggle = document.getElementById('convolution-reverb-toggle');
+    if (convolutionReverbToggle) {
+      convolutionReverbToggle.addEventListener('change', (e) => {
+        if (this.effects) this.effects.setConvolutionReverbEnabled(e.target.checked);
+      });
+    }
+
+    // Algorithmic Reverb
+    const reverbToggle = document.getElementById('reverb-toggle');
+    if (reverbToggle) {
+      reverbToggle.addEventListener('change', (e) => {
+        if (this.effects) this.effects.setReverbEnabled(e.target.checked);
+      });
+    }
+
+    // === EFFECT PARAMETERS ===
+
+    // BitCrusher parameters
+    this.bindParameter('bitcrusher-bits', (value) => {
+      if (this.effects) this.effects.setBitCrusherBits(parseFloat(value));
+    }, (value) => Math.round(value)); // Show as integer
+
+    // Distortion parameters
+    this.bindParameter('distortion-amount', (value) => {
+      if (this.effects) this.effects.setDistortionAmount(parseFloat(value));
+    });
+
+    // Chorus parameters
+    this.bindParameter('chorus-rate', (value) => {
+      if (this.effects) this.effects.setChorusRate(parseFloat(value));
+    });
+
+    this.bindParameter('chorus-depth', (value) => {
+      if (this.effects) this.effects.setChorusDepth(parseFloat(value));
+    });
+
+    // Phaser parameters
+    this.bindParameter('phaser-rate', (value) => {
+      if (this.effects) this.effects.setPhaserRate(parseFloat(value));
+    });
+
+    this.bindParameter('phaser-depth', (value) => {
+      if (this.effects) this.effects.setPhaserDepth(parseFloat(value));
+    });
+
+    // Auto Filter parameters
+    this.bindParameter('filter-cutoff', (value) => {
+      if (this.effects) this.effects.setFilterFrequency(parseFloat(value));
+    });
+
+    // Tape Echo parameters
+    this.bindParameter('tape-echo-time', (value) => {
+      if (this.effects) this.effects.setTapeEchoTime(parseFloat(value));
+    }, (value) => {
+      // Convert slider value to note value display
+      const noteValues = {
+        0.1: "16n",
+        0.2: "8n.",
+        0.3: "8n",
+        0.4: "4n.",
+        0.5: "4n",
+        0.6: "2n.",
+        0.7: "2n",
+        0.8: "1n.",
+        0.9: "1n",
+        1.0: "1m"
+      };
+
+      const val = parseFloat(value);
+      let closestNote = "8n";
+      let minDiff = Infinity;
+
+      for (let key in noteValues) {
+        const diff = Math.abs(parseFloat(key) - val);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closestNote = noteValues[key];
+        }
+      }
+
+      return closestNote;
+    });
+
+    this.bindParameter('tape-echo-feedback', (value) => {
+      if (this.effects) this.effects.setTapeEchoFeedback(parseFloat(value));
+    });
+
+    // Ping Pong Delay parameters
     this.bindParameter('delay-feedback', (value) => {
       if (this.effects) this.effects.setDelayFeedback(parseFloat(value));
     });
@@ -135,6 +281,12 @@ class DubTechnoUI {
       if (this.effects) this.effects.setDelayWet(parseFloat(value));
     });
 
+    // Convolution Reverb parameters
+    this.bindParameter('convolution-reverb-decay', (value) => {
+      if (this.effects) this.effects.setConvolutionReverbDecay(parseFloat(value));
+    });
+
+    // Algorithmic Reverb parameters
     this.bindParameter('reverb-decay', (value) => {
       if (this.effects) this.effects.setReverbDecay(parseFloat(value));
     });
@@ -143,14 +295,7 @@ class DubTechnoUI {
       if (this.effects) this.effects.setReverbWet(parseFloat(value));
     });
 
-    this.bindParameter('filter-cutoff', (value) => {
-      if (this.effects) this.effects.setFilterFrequency(parseFloat(value));
-    });
-
-    this.bindParameter('distortion-amount', (value) => {
-      if (this.effects) this.effects.setDistortionAmount(parseFloat(value));
-    });
-
+    // Master Volume
     this.bindParameter('master-volume', (value) => {
       if (this.effects) {
         const db = parseFloat(value);
@@ -216,7 +361,7 @@ class DubTechnoUI {
   }
 
   // Bind parameter with debouncing
-  bindParameter(id, callback) {
+  bindParameter(id, callback, customFormatter = null) {
     const element = document.getElementById(id);
     if (!element) return;
 
@@ -227,7 +372,11 @@ class DubTechnoUI {
       // Update value display if exists
       const display = document.getElementById(`${id}-value`);
       if (display) {
-        display.textContent = parseFloat(value).toFixed(2);
+        if (customFormatter) {
+          display.textContent = customFormatter(value);
+        } else {
+          display.textContent = parseFloat(value).toFixed(2);
+        }
       }
     };
 

@@ -12,17 +12,48 @@ class EffectsChain {
     /**
      * Initialize all effects
      * Effects are chained in the following order:
-     * Source -> Distortion -> Filter -> Delay -> Reverb -> Compressor -> Destination
+     * Source -> BitCrusher -> Distortion -> Chorus -> Phaser -> Filter -> TapeEcho -> Delay ->
+     * ConvolutionReverb -> Reverb -> Compressor -> Destination
      */
     init() {
         try {
+            // === PRE-EFFECTS (Distortion/Modulation) ===
+
+            // BitCrusher - lo-fi digital degradation
+            this.effects.bitCrusher = new Tone.BitCrusher({
+                bits: 8,
+                wet: 0
+            }).toDestination();
+
             // Warm Distortion - adds harmonic saturation
             this.effects.distortion = new Tone.Distortion({
                 distortion: 0.2,
                 wet: 0
-            }).toDestination();
+            }).connect(this.effects.bitCrusher);
 
-            // Auto Filter - sweeping low-pass filter for movement
+            // Chorus - stereo width and movement
+            this.effects.chorus = new Tone.Chorus({
+                frequency: 1.5,
+                delayTime: 3.5,
+                depth: 0.7,
+                type: "sine",
+                spread: 180,
+                wet: 0
+            }).connect(this.effects.distortion);
+
+            // Phaser - sweeping notches for movement
+            this.effects.phaser = new Tone.Phaser({
+                frequency: 0.5,
+                octaves: 3,
+                stages: 10,
+                Q: 10,
+                baseFrequency: 350,
+                wet: 0
+            }).connect(this.effects.chorus);
+
+            // === FILTERS ===
+
+            // Auto Filter - sweeping filter for movement
             this.effects.filter = new Tone.AutoFilter({
                 frequency: "0.5hz",
                 type: "sine",
@@ -35,21 +66,51 @@ class EffectsChain {
                     Q: 2
                 },
                 wet: 0
-            }).connect(this.effects.distortion);
+            }).connect(this.effects.phaser);
 
-            // Ping Pong Delay - classic dub techno tape echo simulation
+            // === DELAYS ===
+
+            // Tape Echo - vintage tape delay with wow & flutter
+            // (Using FeedbackDelay with filtering to simulate tape)
+            this.effects.tapeEcho = new Tone.FeedbackDelay({
+                delayTime: "8n",
+                feedback: 0.6,
+                wet: 0
+            }).connect(this.effects.filter);
+
+            // Add subtle filtering to tape echo for warmth
+            const tapeFilter = new Tone.Filter({
+                frequency: 3000,
+                type: "lowpass",
+                rolloff: -12
+            });
+            this.effects.tapeEcho.connect(tapeFilter);
+            tapeFilter.connect(this.effects.filter);
+
+            // Ping Pong Delay - stereo delay
             this.effects.delay = new Tone.PingPongDelay({
                 delayTime: "8n",
                 feedback: 0.65,
                 wet: 0
-            }).connect(this.effects.filter);
+            }).connect(this.effects.tapeEcho);
 
-            // Reverb - deep spacious atmosphere
+            // === REVERBS ===
+
+            // Convolution Reverb - for realistic spaces
+            this.effects.convolutionReverb = new Tone.Reverb({
+                decay: 8,
+                preDelay: 0.01,
+                wet: 0
+            }).connect(this.effects.delay);
+
+            // Algorithmic Reverb - deep spacious atmosphere
             this.effects.reverb = new Tone.Reverb({
                 decay: 6,
                 preDelay: 0.01,
                 wet: 0
-            }).connect(this.effects.delay);
+            }).connect(this.effects.convolutionReverb);
+
+            // === MASTER EFFECTS ===
 
             // Master Compressor - glues everything together
             this.effects.compressor = new Tone.Compressor({
@@ -63,7 +124,7 @@ class EffectsChain {
             // Master Volume
             this.masterVolume = new Tone.Volume(-10).connect(this.effects.compressor);
 
-            console.log('✓ Effects chain initialized');
+            console.log('✓ Effects chain initialized with 10 effects');
             this.initialized = true;
 
             // Return the master volume as the input point for the chain
@@ -230,6 +291,126 @@ class EffectsChain {
         if (this.effects.distortion) {
             // Clamp to prevent floating point errors
             this.effects.distortion.wet.value = Math.max(0, Math.min(1, value));
+        }
+    }
+
+    /**
+     * BitCrusher controls
+     */
+    setBitCrusherEnabled(enabled) {
+        if (this.effects.bitCrusher) {
+            this.effects.bitCrusher.wet.value = enabled ? 1 : 0;
+        }
+    }
+
+    setBitCrusherBits(value) {
+        if (this.effects.bitCrusher) {
+            // Clamp bits to valid range (1-16)
+            this.effects.bitCrusher.bits = Math.max(1, Math.min(16, Math.round(value)));
+        }
+    }
+
+    /**
+     * Chorus controls
+     */
+    setChorusEnabled(enabled) {
+        if (this.effects.chorus) {
+            this.effects.chorus.wet.value = enabled ? 0.5 : 0;
+        }
+    }
+
+    setChorusRate(value) {
+        if (this.effects.chorus) {
+            this.effects.chorus.frequency.value = Math.max(0.1, Math.min(10, value));
+        }
+    }
+
+    setChorusDepth(value) {
+        if (this.effects.chorus) {
+            this.effects.chorus.depth = Math.max(0, Math.min(1, value));
+        }
+    }
+
+    /**
+     * Phaser controls
+     */
+    setPhaserEnabled(enabled) {
+        if (this.effects.phaser) {
+            this.effects.phaser.wet.value = enabled ? 0.5 : 0;
+        }
+    }
+
+    setPhaserRate(value) {
+        if (this.effects.phaser) {
+            this.effects.phaser.frequency.value = Math.max(0.1, Math.min(10, value));
+        }
+    }
+
+    setPhaserDepth(value) {
+        if (this.effects.phaser) {
+            this.effects.phaser.octaves = Math.max(0, Math.min(8, value));
+        }
+    }
+
+    /**
+     * Tape Echo controls
+     */
+    setTapeEchoEnabled(enabled) {
+        if (this.effects.tapeEcho) {
+            this.effects.tapeEcho.wet.value = enabled ? 0.4 : 0;
+        }
+    }
+
+    setTapeEchoTime(value) {
+        if (this.effects.tapeEcho) {
+            // Convert slider value (0.1-1) to note values
+            const noteValues = {
+                0.1: "16n",
+                0.2: "8n.",
+                0.3: "8n",
+                0.4: "4n.",
+                0.5: "4n",
+                0.6: "2n.",
+                0.7: "2n",
+                0.8: "1n.",
+                0.9: "1n",
+                1.0: "1m"
+            };
+
+            // Find closest note value
+            let closestValue = "8n";
+            let minDiff = Infinity;
+
+            for (let key in noteValues) {
+                const diff = Math.abs(parseFloat(key) - value);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closestValue = noteValues[key];
+                }
+            }
+
+            this.effects.tapeEcho.delayTime.value = closestValue;
+        }
+    }
+
+    setTapeEchoFeedback(value) {
+        if (this.effects.tapeEcho) {
+            this.effects.tapeEcho.feedback.value = Math.max(0, Math.min(0.95, value));
+        }
+    }
+
+    /**
+     * Convolution Reverb controls
+     */
+    setConvolutionReverbEnabled(enabled) {
+        if (this.effects.convolutionReverb) {
+            this.effects.convolutionReverb.wet.value = enabled ? 0.3 : 0;
+        }
+    }
+
+    setConvolutionReverbDecay(value) {
+        if (this.effects.convolutionReverb) {
+            this.effects.convolutionReverb.decay = Math.max(0.1, Math.min(20, value));
         }
     }
 
