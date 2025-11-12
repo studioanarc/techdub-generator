@@ -160,6 +160,14 @@ class DubTechnoUI {
       });
     }
 
+    // Granular Processor
+    const granularToggle = document.getElementById('granular-toggle');
+    if (granularToggle) {
+      granularToggle.addEventListener('change', (e) => {
+        if (this.effects) this.effects.setGranularEnabled(e.target.checked);
+      });
+    }
+
     // Auto Filter
     const filterToggle = document.getElementById('filter-toggle');
     if (filterToggle) {
@@ -228,6 +236,27 @@ class DubTechnoUI {
 
     this.bindParameter('phaser-depth', (value) => {
       if (this.effects) this.effects.setPhaserDepth(parseFloat(value));
+    });
+
+    // Granular Processor parameters
+    this.bindParameter('granular-size', (value) => {
+      if (this.effects) this.effects.setGranularSize(parseFloat(value) / 1000); // Convert ms to seconds
+    }, (value) => Math.round(value)); // Show as integer ms
+
+    this.bindParameter('granular-density', (value) => {
+      if (this.effects) this.effects.setGranularDensity(parseFloat(value));
+    });
+
+    this.bindParameter('granular-pitch', (value) => {
+      if (this.effects) this.effects.setGranularPitch(parseFloat(value));
+    }, (value) => {
+      // Show with + sign for positive values
+      const val = Math.round(value);
+      return val > 0 ? `+${val}` : val.toString();
+    });
+
+    this.bindParameter('granular-wet', (value) => {
+      if (this.effects) this.effects.setGranularWet(parseFloat(value));
     });
 
     // Auto Filter parameters

@@ -68,6 +68,13 @@ class EffectsChain {
                 wet: 0
             }).connect(this.effects.phaser);
 
+            // === GRANULAR PROCESSOR ===
+
+            // Granular Processor - breaks audio into grains for texture
+            // Implemented using multiple modulated delays and pitch shifting
+            this.effects.granularProcessor = this.createGranularProcessor();
+            this.effects.granularProcessor.connect(this.effects.filter);
+
             // === DELAYS ===
 
             // Tape Echo - vintage tape delay with wow & flutter
@@ -76,7 +83,7 @@ class EffectsChain {
                 delayTime: "8n",
                 feedback: 0.6,
                 wet: 0
-            }).connect(this.effects.filter);
+            }).connect(this.effects.granularProcessor);
 
             // Add subtle filtering to tape echo for warmth
             const tapeFilter = new Tone.Filter({
@@ -124,7 +131,7 @@ class EffectsChain {
             // Master Volume
             this.masterVolume = new Tone.Volume(-10).connect(this.effects.compressor);
 
-            console.log('✓ Effects chain initialized with 10 effects');
+            console.log('✓ Effects chain initialized with 11 effects');
             this.initialized = true;
 
             // Return the master volume as the input point for the chain
@@ -134,6 +141,82 @@ class EffectsChain {
             console.error('Failed to initialize effects:', error);
             throw error;
         }
+    }
+
+    /**
+     * Create a granular processor using multiple delays and modulation
+     */
+    createGranularProcessor() {
+        // Create a channel to combine multiple grain delays
+        const grainMix = new Tone.CrossFade(0); // Start with 0 (dry signal)
+
+        // Create 4 grain delays with different characteristics
+        const grainDelays = [];
+        const grainTimes = [0.02, 0.035, 0.05, 0.075]; // 20-75ms grain sizes
+
+        grainTimes.forEach((time, index) => {
+            // Create delay for this grain
+            const grainDelay = new Tone.FeedbackDelay({
+                delayTime: time,
+                feedback: 0.3,
+                wet: 1
+            });
+
+            // Add LFO to modulate delay time for grain randomization
+            const lfo = new Tone.LFO({
+                frequency: 0.1 + (index * 0.05), // Slightly different rates
+                min: time * 0.8,
+                max: time * 1.2,
+                type: "sine"
+            });
+            lfo.connect(grainDelay.delayTime);
+            lfo.start();
+
+            // Store references
+            grainDelays.push({ delay: grainDelay, lfo: lfo });
+
+            // Connect to mix
+            grainDelay.connect(grainMix.b);
+        });
+
+        // Add pitch shifter for grain transposition
+        const pitchShift = new Tone.PitchShift({
+            pitch: 0,
+            windowSize: 0.05,
+            delayTime: 0,
+            feedback: 0
+        });
+        pitchShift.connect(grainDelays[0].delay);
+        grainDelays.slice(1).forEach(grain => {
+            pitchShift.connect(grain.delay);
+        });
+
+        // Add tremolo for grain windowing (amplitude envelope)
+        const tremolo = new Tone.Tremolo({
+            frequency: 8,
+            depth: 0.5,
+            type: "sine",
+            spread: 180
+        });
+        tremolo.connect(pitchShift);
+        tremolo.start(); // Start tremolo oscillation
+
+        // Input goes to both dry (a) and wet (b via tremolo) sides
+        const input = new Tone.Gain(1);
+        input.connect(grainMix.a); // Dry signal
+        input.connect(tremolo);     // Wet signal (through granular chain)
+
+        // Store all components for later cleanup and control
+        grainMix._granularComponents = {
+            input: input,
+            tremolo: tremolo,
+            pitchShift: pitchShift,
+            grains: grainDelays,
+            output: grainMix
+        };
+
+        // Return the input as the main connection point
+        return input;
     }
 
     /**
@@ -411,6 +494,66 @@ class EffectsChain {
     setConvolutionReverbDecay(value) {
         if (this.effects.convolutionReverb) {
             this.effects.convolutionReverb.decay = Math.max(0.1, Math.min(20, value));
+        }
+    }
+
+    /**
+     * Granular Processor controls
+     */
+    setGranularEnabled(enabled) {
+        if (this.effects.granularProcessor && this.effects.granularProcessor._granularComponents) {
+            const components = this.effects.granularProcessor._granularComponents;
+            // Control the crossfade between dry (0) and wet (1) signal
+            components.output.fade.value = enabled ? 0.5 : 0;
+        }
+    }
+
+    setGranularSize(value) {
+        if (this.effects.granularProcessor && this.effects.granularProcessor._granularComponents) {
+            const components = this.effects.granularProcessor._granularComponents;
+            // Clamp grain size to 10-100ms range
+            const grainSize = Math.max(0.01, Math.min(0.1, value));
+
+            // Update all grain delays proportionally
+            components.grains.forEach((grain, index) => {
+                const baseTimes = [0.02, 0.035, 0.05, 0.075];
+                const ratio = grainSize / 0.05; // 50ms is center
+                const newTime = baseTimes[index] * ratio;
+
+                grain.delay.delayTime.value = newTime;
+                // Update LFO range
+                grain.lfo.min = newTime * 0.8;
+                grain.lfo.max = newTime * 1.2;
+            });
+
+            // Update pitch shift window size
+            components.pitchShift.windowSize = grainSize;
+        }
+    }
+
+    setGranularDensity(value) {
+        if (this.effects.granularProcessor && this.effects.granularProcessor._granularComponents) {
+            const components = this.effects.granularProcessor._granularComponents;
+            // Control tremolo frequency (grain rate) - 1-20 Hz
+            const density = Math.max(1, Math.min(20, value));
+            components.tremolo.frequency.value = density;
+        }
+    }
+
+    setGranularPitch(value) {
+        if (this.effects.granularProcessor && this.effects.granularProcessor._granularComponents) {
+            const components = this.effects.granularProcessor._granularComponents;
+            // Pitch shift in semitones - clamp to ±12 semitones (1 octave)
+            const pitch = Math.max(-12, Math.min(12, value));
+            components.pitchShift.pitch = pitch;
+        }
+    }
+
+    setGranularWet(value) {
+        if (this.effects.granularProcessor && this.effects.granularProcessor._granularComponents) {
+            const components = this.effects.granularProcessor._granularComponents;
+            // Control wet/dry mix (0 = dry, 1 = wet)
+            components.output.fade.value = Math.max(0, Math.min(1, value));
         }
     }
 
