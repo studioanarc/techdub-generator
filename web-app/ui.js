@@ -192,6 +192,14 @@ class DubTechnoUI {
       });
     }
 
+    // Probability Delay
+    const probabilityDelayToggle = document.getElementById('probability-delay-toggle');
+    if (probabilityDelayToggle) {
+      probabilityDelayToggle.addEventListener('change', (e) => {
+        if (this.effects) this.effects.setProbabilityDelayEnabled(e.target.checked);
+      });
+    }
+
     // Convolution Reverb
     const convolutionReverbToggle = document.getElementById('convolution-reverb-toggle');
     if (convolutionReverbToggle) {
@@ -308,6 +316,23 @@ class DubTechnoUI {
 
     this.bindParameter('delay-wet', (value) => {
       if (this.effects) this.effects.setDelayWet(parseFloat(value));
+    });
+
+    // Probability Delay parameters
+    this.bindParameter('probability-delay-probability', (value) => {
+      if (this.effects) this.effects.setProbabilityDelayProbability(parseFloat(value));
+    });
+
+    this.bindParameter('probability-delay-rate', (value) => {
+      if (this.effects) this.effects.setProbabilityDelayRate(parseFloat(value));
+    });
+
+    this.bindParameter('probability-delay-feedback', (value) => {
+      if (this.effects) this.effects.setProbabilityDelayFeedback(parseFloat(value));
+    });
+
+    this.bindParameter('probability-delay-wet', (value) => {
+      if (this.effects) this.effects.setProbabilityDelayWet(parseFloat(value));
     });
 
     // Convolution Reverb parameters

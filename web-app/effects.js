@@ -101,6 +101,12 @@ class EffectsChain {
                 wet: 0
             }).connect(this.effects.tapeEcho);
 
+            // === PROBABILITY DELAY (Novel Effect) ===
+
+            // Probability Delay - delays with random probability gates
+            this.effects.probabilityDelay = this.createProbabilityDelay();
+            this.effects.probabilityDelay.connect(this.effects.delay);
+
             // === REVERBS ===
 
             // Convolution Reverb - for realistic spaces
@@ -108,7 +114,7 @@ class EffectsChain {
                 decay: 8,
                 preDelay: 0.01,
                 wet: 0
-            }).connect(this.effects.delay);
+            }).connect(this.effects.probabilityDelay);
 
             // Algorithmic Reverb - deep spacious atmosphere
             this.effects.reverb = new Tone.Reverb({
@@ -131,7 +137,7 @@ class EffectsChain {
             // Master Volume
             this.masterVolume = new Tone.Volume(-10).connect(this.effects.compressor);
 
-            console.log('✓ Effects chain initialized with 11 effects');
+            console.log('✓ Effects chain initialized with 12 effects');
             this.initialized = true;
 
             // Return the master volume as the input point for the chain
@@ -217,6 +223,97 @@ class EffectsChain {
 
         // Return the input as the main connection point
         return input;
+    }
+
+    /**
+     * Create a probability delay with random echo patterns
+     */
+    createProbabilityDelay() {
+        // Create mix between dry and wet signal
+        const probMix = new Tone.CrossFade(0);
+
+        // Create 5 delay taps at musical intervals
+        const delayTaps = [];
+        const tapTimes = ["8n", "8n.", "4n", "4n.", "2n"]; // Different rhythmic intervals
+
+        tapTimes.forEach((time, index) => {
+            // Create delay tap
+            const delay = new Tone.FeedbackDelay({
+                delayTime: time,
+                feedback: 0.4,
+                wet: 1
+            });
+
+            // Create gate for this tap (controls if it's active)
+            const gate = new Tone.Gain(1);
+            delay.connect(gate);
+
+            // Connect to output mix
+            gate.connect(probMix.b);
+
+            // Store tap with its gate and time
+            delayTaps.push({
+                delay: delay,
+                gate: gate,
+                time: time,
+                isActive: true
+            });
+        });
+
+        // Create input that feeds all delay taps
+        const input = new Tone.Gain(1);
+        delayTaps.forEach(tap => {
+            input.connect(tap.delay);
+        });
+
+        // Input also goes to dry signal
+        input.connect(probMix.a);
+
+        // Store components for later control
+        probMix._probabilityComponents = {
+            input: input,
+            taps: delayTaps,
+            output: probMix,
+            probability: 0.7, // Default 70% probability
+            rate: 2, // Default 2Hz update rate
+            intervalId: null
+        };
+
+        // Start probability engine
+        this.startProbabilityEngine(probMix._probabilityComponents);
+
+        return input;
+    }
+
+    /**
+     * Start the probability engine that randomly gates delay taps
+     */
+    startProbabilityEngine(components) {
+        if (components.intervalId) {
+            clearInterval(components.intervalId);
+        }
+
+        // Update probability gates at specified rate
+        const updateInterval = () => {
+            components.taps.forEach(tap => {
+                // Random check against probability threshold
+                const random = Math.random();
+                const shouldBeActive = random < components.probability;
+
+                if (shouldBeActive && !tap.isActive) {
+                    // Fade in gate
+                    tap.gate.gain.rampTo(1, 0.05);
+                    tap.isActive = true;
+                } else if (!shouldBeActive && tap.isActive) {
+                    // Fade out gate
+                    tap.gate.gain.rampTo(0, 0.05);
+                    tap.isActive = false;
+                }
+            });
+        };
+
+        // Run at specified rate (converted to ms)
+        components.intervalId = setInterval(updateInterval, 1000 / components.rate);
     }
 
     /**
@@ -552,6 +649,54 @@ class EffectsChain {
     setGranularWet(value) {
         if (this.effects.granularProcessor && this.effects.granularProcessor._granularComponents) {
             const components = this.effects.granularProcessor._granularComponents;
+            // Control wet/dry mix (0 = dry, 1 = wet)
+            components.output.fade.value = Math.max(0, Math.min(1, value));
+        }
+    }
+
+    /**
+     * Probability Delay controls
+     */
+    setProbabilityDelayEnabled(enabled) {
+        if (this.effects.probabilityDelay && this.effects.probabilityDelay._probabilityComponents) {
+            const components = this.effects.probabilityDelay._probabilityComponents;
+            // Control the crossfade between dry (0) and wet (1) signal
+            components.output.fade.value = enabled ? 0.5 : 0;
+        }
+    }
+
+    setProbabilityDelayProbability(value) {
+        if (this.effects.probabilityDelay && this.effects.probabilityDelay._probabilityComponents) {
+            const components = this.effects.probabilityDelay._probabilityComponents;
+            // Clamp probability to 0-1 range
+            components.probability = Math.max(0, Math.min(1, value));
+        }
+    }
+
+    setProbabilityDelayRate(value) {
+        if (this.effects.probabilityDelay && this.effects.probabilityDelay._probabilityComponents) {
+            const components = this.effects.probabilityDelay._probabilityComponents;
+            // Clamp rate to 0.1-10 Hz
+            components.rate = Math.max(0.1, Math.min(10, value));
+            // Restart the probability engine with new rate
+            this.startProbabilityEngine(components);
+        }
+    }
+
+    setProbabilityDelayFeedback(value) {
+        if (this.effects.probabilityDelay && this.effects.probabilityDelay._probabilityComponents) {
+            const components = this.effects.probabilityDelay._probabilityComponents;
+            // Update feedback for all delay taps
+            const feedback = Math.max(0, Math.min(0.95, value));
+            components.taps.forEach(tap => {
+                tap.delay.feedback.value = feedback;
+            });
+        }
+    }
+
+    setProbabilityDelayWet(value) {
+        if (this.effects.probabilityDelay && this.effects.probabilityDelay._probabilityComponents) {
+            const components = this.effects.probabilityDelay._probabilityComponents;
             // Control wet/dry mix (0 = dry, 1 = wet)
             components.output.fade.value = Math.max(0, Math.min(1, value));
         }
