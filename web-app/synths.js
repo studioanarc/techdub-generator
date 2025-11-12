@@ -4,7 +4,9 @@
 class DubSynths {
   constructor() {
     this.synths = {};
-    this.masterVolume = new Tone.Volume(-6).toDestination();
+    // Create volume node but don't connect to destination yet
+    // (will be connected through effects chain)
+    this.masterVolume = new Tone.Volume(-6);
     this.initSynths();
   }
 

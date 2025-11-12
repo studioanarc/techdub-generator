@@ -32,19 +32,17 @@ class DubTechnoUI {
   async init() {
     // Initialize audio modules
     this.synths = new DubSynths();
-    this.effects = new DubEffects(this.synths.masterVolume);
+    this.effects = new EffectsChain();
+    this.effects.init(); // Initialize effects chain
     this.generators = new DubGenerators(this.synths, this.effects);
     this.visualizer = new DubVisualizer('visualizer');
     this.presetManager = new PresetManager(this.synths, this.effects, this.generators);
     this.exporter = new AudioExporter(this.synths, this.effects, this.generators);
 
-    // Connect synths to effects
-    this.effects.connectSynth(this.synths.synths.bass);
-    this.effects.connectSynth(this.synths.synths.pad);
-    this.effects.connectSynth(this.synths.synths.stab);
-    this.effects.connectSynth(this.synths.synths.kick);
-    this.effects.connectSynth(this.synths.synths.hat);
-    this.effects.connectSynth(this.synths.synths.noise);
+    // Connect synth master volume to effects chain
+    // (All synths are already connected to synths.masterVolume)
+    const effectsInput = this.effects.getInput();
+    this.synths.masterVolume.connect(effectsInput);
 
     // Setup UI event listeners
     this.setupEventListeners();
