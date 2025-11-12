@@ -182,7 +182,7 @@ class EffectsChain {
                 type: "sine"
             });
             lfo.connect(grainDelay.delayTime);
-            lfo.start();
+            // Don't start LFO yet - wait until effect is enabled
 
             // Store references
             grainDelays.push({ delay: grainDelay, lfo: lfo });
@@ -211,7 +211,7 @@ class EffectsChain {
             spread: 180
         });
         tremolo.connect(pitchShift);
-        tremolo.start(); // Start tremolo oscillation
+        // Don't start tremolo yet - wait until effect is enabled
 
         // Input goes to both dry (a) and wet (b via tremolo) sides
         const input = new Tone.Gain(1);
@@ -224,7 +224,8 @@ class EffectsChain {
             tremolo: tremolo,
             pitchShift: pitchShift,
             grains: grainDelays,
-            output: grainMix
+            output: grainMix,
+            isRunning: false
         };
 
         // Return the input as the main connection point
@@ -282,11 +283,11 @@ class EffectsChain {
             output: probMix,
             probability: 0.7, // Default 70% probability
             rate: 2, // Default 2Hz update rate
-            intervalId: null
+            intervalId: null,
+            isRunning: false
         };
 
-        // Start probability engine
-        this.startProbabilityEngine(probMix._probabilityComponents);
+        // Don't start probability engine yet - wait until effect is enabled
 
         return input;
     }
@@ -320,6 +321,18 @@ class EffectsChain {
 
         // Run at specified rate (converted to ms)
         components.intervalId = setInterval(updateInterval, 1000 / components.rate);
+        components.isRunning = true;
+    }
+
+    /**
+     * Stop the probability engine
+     */
+    stopProbabilityEngine(components) {
+        if (components.intervalId) {
+            clearInterval(components.intervalId);
+            components.intervalId = null;
+            components.isRunning = false;
+        }
     }
 
     /**
@@ -355,7 +368,7 @@ class EffectsChain {
         });
         freezeFilter.connect(freezeChorus);
         freezeChorus.connect(freezeMix.b);
-        freezeChorus.start();
+        // Don't start chorus yet - wait until effect is enabled
 
         // Create input node
         const input = new Tone.Gain(1);
@@ -370,7 +383,8 @@ class EffectsChain {
             chorus: freezeChorus,
             output: freezeMix,
             isFrozen: false,
-            freezeDecay: 0.8 // Default decay rate when frozen
+            freezeDecay: 0.8, // Default decay rate when frozen
+            isRunning: false
         };
 
         return input;
@@ -662,6 +676,21 @@ class EffectsChain {
             const components = this.effects.granularProcessor._granularComponents;
             // Control the crossfade between dry (0) and wet (1) signal
             components.output.fade.value = enabled ? 0.5 : 0;
+
+            // Start/stop LFOs and tremolo
+            if (enabled && !components.isRunning) {
+                components.tremolo.start();
+                components.grains.forEach(grain => {
+                    grain.lfo.start();
+                });
+                components.isRunning = true;
+            } else if (!enabled && components.isRunning) {
+                components.tremolo.stop();
+                components.grains.forEach(grain => {
+                    grain.lfo.stop();
+                });
+                components.isRunning = false;
+            }
         }
     }
 
@@ -722,6 +751,13 @@ class EffectsChain {
             const components = this.effects.probabilityDelay._probabilityComponents;
             // Control the crossfade between dry (0) and wet (1) signal
             components.output.fade.value = enabled ? 0.5 : 0;
+
+            // Start/stop probability engine
+            if (enabled && !components.isRunning) {
+                this.startProbabilityEngine(components);
+            } else if (!enabled && components.isRunning) {
+                this.stopProbabilityEngine(components);
+            }
         }
     }
 
@@ -738,8 +774,10 @@ class EffectsChain {
             const components = this.effects.probabilityDelay._probabilityComponents;
             // Clamp rate to 0.1-10 Hz
             components.rate = Math.max(0.1, Math.min(10, value));
-            // Restart the probability engine with new rate
-            this.startProbabilityEngine(components);
+            // Restart the probability engine with new rate (only if already running)
+            if (components.isRunning) {
+                this.startProbabilityEngine(components);
+            }
         }
     }
 
@@ -770,6 +808,15 @@ class EffectsChain {
             const components = this.effects.spectralFreeze._freezeComponents;
             // Control the crossfade between dry (0) and wet (1) signal
             components.output.fade.value = enabled ? 0.5 : 0;
+
+            // Start/stop chorus
+            if (enabled && !components.isRunning) {
+                components.chorus.start();
+                components.isRunning = true;
+            } else if (!enabled && components.isRunning) {
+                components.chorus.stop();
+                components.isRunning = false;
+            }
         }
     }
 

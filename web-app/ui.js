@@ -37,6 +37,9 @@ class DubTechnoUI {
     // Setup keyboard shortcuts
     this.setupKeyboardShortcuts();
 
+    // Load factory presets UI immediately (before audio init)
+    this.loadFactoryPresetsUI();
+
     console.log('Dub Techno Generator UI ready - click Play to start audio');
   }
 
@@ -60,9 +63,6 @@ class DubTechnoUI {
     // Connect synth master volume to effects chain
     const effectsInput = this.effects.getInput();
     this.synths.masterVolume.connect(effectsInput);
-
-    // Load factory presets into UI
-    this.loadFactoryPresetsUI();
 
     // Initialize with default preset
     await this.loadFactoryPreset('dark-minimal');
@@ -548,6 +548,28 @@ class DubTechnoUI {
     const presetList = document.getElementById('factory-presets');
     if (!presetList) return;
 
+    // If presetManager doesn't exist yet, create placeholder buttons
+    if (!this.presetManager) {
+      // Static list of factory preset names (must match PresetManager)
+      const factoryPresetNames = [
+        { id: 'dark-minimal', name: 'Dark Minimal' },
+        { id: 'deep-dub', name: 'Deep Dub' },
+        { id: 'rhythm-sound', name: 'Rhythm & Sound' },
+        { id: 'andy-stott', name: 'Andy Stott' },
+        { id: 'basic-channel', name: 'Basic Channel' }
+      ];
+
+      factoryPresetNames.forEach(preset => {
+        const btn = document.createElement('button');
+        btn.className = 'preset-btn';
+        btn.textContent = preset.name;
+        btn.addEventListener('click', () => this.loadFactoryPreset(preset.id));
+        presetList.appendChild(btn);
+      });
+      return;
+    }
+
+    // If presetManager exists, load from it
     const names = this.presetManager.getFactoryPresetNames();
     names.forEach(name => {
       const btn = document.createElement('button');
@@ -559,6 +581,11 @@ class DubTechnoUI {
   }
 
   async loadFactoryPreset(name) {
+    // Initialize audio if not already initialized
+    if (!this.audioInitialized) {
+      await this.initAudio();
+    }
+
     const preset = this.presetManager.getFactoryPreset(name);
     if (!preset) return;
 
