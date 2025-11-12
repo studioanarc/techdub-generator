@@ -127,13 +127,15 @@ class EffectsChain {
 
     setDelayFeedback(value) {
         if (this.effects.delay) {
-            this.effects.delay.feedback.value = value;
+            // Clamp to prevent floating point errors
+            this.effects.delay.feedback.value = Math.max(0, Math.min(0.99, value));
         }
     }
 
     setDelayWet(value) {
-        if (this.effects.delay && document.getElementById('delayToggle').checked) {
-            this.effects.delay.wet.value = value;
+        if (this.effects.delay) {
+            // Clamp to prevent floating point errors
+            this.effects.delay.wet.value = Math.max(0, Math.min(1, value));
         }
     }
 
@@ -142,7 +144,8 @@ class EffectsChain {
      */
     setReverbEnabled(enabled) {
         if (this.effects.reverb) {
-            this.effects.reverb.wet.value = enabled ? parseFloat(document.getElementById('reverbWet').value) : 0;
+            const wetValue = enabled ? parseFloat(document.getElementById('reverbWet')?.value || 0.25) : 0;
+            this.effects.reverb.wet.value = Math.max(0, Math.min(1, wetValue));
         }
     }
 
@@ -151,13 +154,15 @@ class EffectsChain {
      */
     setReverbDecay(value) {
         if (this.effects.reverb) {
-            this.effects.reverb.decay = value;
+            // Clamp decay to valid range
+            this.effects.reverb.decay = Math.max(0.1, Math.min(10, value));
         }
     }
 
     setReverbWet(value) {
-        if (this.effects.reverb && document.getElementById('reverbToggle').checked) {
-            this.effects.reverb.wet.value = value;
+        if (this.effects.reverb) {
+            // Clamp to prevent floating point errors
+            this.effects.reverb.wet.value = Math.max(0, Math.min(1, value));
         }
     }
 
@@ -166,7 +171,8 @@ class EffectsChain {
      */
     setFilterEnabled(enabled) {
         if (this.effects.filter) {
-            this.effects.filter.wet.value = enabled ? parseFloat(document.getElementById('filterWet').value) : 0;
+            const wetValue = enabled ? parseFloat(document.getElementById('filterWet')?.value || 0.3) : 0;
+            this.effects.filter.wet.value = Math.max(0, Math.min(1, wetValue));
 
             if (enabled) {
                 this.effects.filter.start();
@@ -181,19 +187,22 @@ class EffectsChain {
      */
     setFilterFrequency(value) {
         if (this.effects.filter) {
-            this.effects.filter.frequency.value = value;
+            // Clamp frequency to valid range
+            this.effects.filter.frequency.value = Math.max(0.01, Math.min(20, value));
         }
     }
 
     setFilterDepth(value) {
         if (this.effects.filter) {
-            this.effects.filter.depth.value = value;
+            // Clamp depth to 0-1 range
+            this.effects.filter.depth.value = Math.max(0, Math.min(1, value));
         }
     }
 
     setFilterWet(value) {
-        if (this.effects.filter && document.getElementById('filterToggle').checked) {
-            this.effects.filter.wet.value = value;
+        if (this.effects.filter) {
+            // Clamp to prevent floating point errors
+            this.effects.filter.wet.value = Math.max(0, Math.min(1, value));
         }
     }
 
@@ -202,7 +211,8 @@ class EffectsChain {
      */
     setDistortionEnabled(enabled) {
         if (this.effects.distortion) {
-            this.effects.distortion.wet.value = enabled ? parseFloat(document.getElementById('distortionWet').value) : 0;
+            const wetValue = enabled ? parseFloat(document.getElementById('distortionWet')?.value || 0.2) : 0;
+            this.effects.distortion.wet.value = Math.max(0, Math.min(1, wetValue));
         }
     }
 
@@ -211,13 +221,15 @@ class EffectsChain {
      */
     setDistortionAmount(value) {
         if (this.effects.distortion) {
-            this.effects.distortion.distortion = value;
+            // Clamp distortion amount to valid range
+            this.effects.distortion.distortion = Math.max(0, Math.min(1, value));
         }
     }
 
     setDistortionWet(value) {
-        if (this.effects.distortion && document.getElementById('distortionToggle').checked) {
-            this.effects.distortion.wet.value = value;
+        if (this.effects.distortion) {
+            // Clamp to prevent floating point errors
+            this.effects.distortion.wet.value = Math.max(0, Math.min(1, value));
         }
     }
 
@@ -226,7 +238,8 @@ class EffectsChain {
      */
     setMasterVolume(db) {
         if (this.masterVolume) {
-            this.masterVolume.volume.value = db;
+            // Clamp dB to reasonable range (-60dB to +6dB)
+            this.masterVolume.volume.value = Math.max(-60, Math.min(6, db));
         }
     }
 

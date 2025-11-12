@@ -116,31 +116,32 @@ class DubTechnoUI {
 
     // Effects parameters
     this.bindParameter('delay-feedback', (value) => {
-      this.effects.updateDelay({ feedback: parseFloat(value) });
+      this.effects.setDelayFeedback(parseFloat(value));
     });
 
     this.bindParameter('delay-wet', (value) => {
-      this.effects.updateDelay({ wet: parseFloat(value) });
+      this.effects.setDelayWet(parseFloat(value));
     });
 
     this.bindParameter('reverb-decay', (value) => {
-      this.effects.updateReverb({ decay: parseFloat(value) });
+      this.effects.setReverbDecay(parseFloat(value));
     });
 
     this.bindParameter('reverb-wet', (value) => {
-      this.effects.updateReverb({ wet: parseFloat(value) });
+      this.effects.setReverbWet(parseFloat(value));
     });
 
     this.bindParameter('filter-cutoff', (value) => {
-      this.effects.updateFilter({ frequency: parseFloat(value) });
+      this.effects.setFilterFrequency(parseFloat(value));
     });
 
     this.bindParameter('distortion-amount', (value) => {
-      this.effects.updateDistortion({ amount: parseFloat(value) });
+      this.effects.setDistortionAmount(parseFloat(value));
     });
 
     this.bindParameter('master-volume', (value) => {
-      this.synths.setMasterVolume(parseFloat(value));
+      const db = parseFloat(value);
+      this.effects.setMasterVolume(db);
     });
 
     // Preset controls
