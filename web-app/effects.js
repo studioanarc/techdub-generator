@@ -231,6 +231,78 @@ class EffectsChain {
     }
 
     /**
+     * Get current settings
+     */
+    getSettings() {
+        return {
+            delay: {
+                enabled: document.getElementById('delayToggle')?.checked || false,
+                time: this.effects.delay?.delayTime.value || "8n",
+                feedback: this.effects.delay?.feedback.value || 0.65,
+                wet: this.effects.delay?.wet.value || 0.3
+            },
+            reverb: {
+                enabled: document.getElementById('reverbToggle')?.checked || false,
+                decay: this.effects.reverb?.decay || 6,
+                wet: this.effects.reverb?.wet.value || 0.25
+            },
+            filter: {
+                enabled: document.getElementById('filterToggle')?.checked || false,
+                frequency: this.effects.filter?.frequency.value || 0.5,
+                depth: this.effects.filter?.depth.value || 0.6,
+                wet: this.effects.filter?.wet.value || 0.3
+            },
+            distortion: {
+                enabled: document.getElementById('distortionToggle')?.checked || false,
+                amount: this.effects.distortion?.distortion || 0.2,
+                wet: this.effects.distortion?.wet.value || 0.2
+            },
+            masterVolume: this.masterVolume?.volume.value || -6
+        };
+    }
+
+    /**
+     * Apply settings from preset
+     */
+    applySettings(settings) {
+        if (!settings) return;
+
+        // Apply delay
+        if (settings.delay) {
+            if (settings.delay.enabled !== undefined) this.setDelayEnabled(settings.delay.enabled);
+            if (settings.delay.feedback !== undefined) this.setDelayFeedback(settings.delay.feedback);
+            if (settings.delay.wet !== undefined) this.setDelayWet(settings.delay.wet);
+        }
+
+        // Apply reverb
+        if (settings.reverb) {
+            if (settings.reverb.enabled !== undefined) this.setReverbEnabled(settings.reverb.enabled);
+            if (settings.reverb.decay !== undefined) this.setReverbDecay(settings.reverb.decay);
+            if (settings.reverb.wet !== undefined) this.setReverbWet(settings.reverb.wet);
+        }
+
+        // Apply filter
+        if (settings.filter) {
+            if (settings.filter.enabled !== undefined) this.setFilterEnabled(settings.filter.enabled);
+            if (settings.filter.frequency !== undefined) this.setFilterFrequency(settings.filter.frequency);
+            if (settings.filter.depth !== undefined) this.setFilterDepth(settings.filter.depth);
+            if (settings.filter.wet !== undefined) this.setFilterWet(settings.filter.wet);
+        }
+
+        // Apply distortion
+        if (settings.distortion) {
+            if (settings.distortion.enabled !== undefined) this.setDistortionEnabled(settings.distortion.enabled);
+            if (settings.distortion.amount !== undefined) this.setDistortionAmount(settings.distortion.amount);
+            if (settings.distortion.wet !== undefined) this.setDistortionWet(settings.distortion.wet);
+        }
+
+        // Apply master volume
+        if (settings.masterVolume !== undefined) {
+            this.setMasterVolume(settings.masterVolume);
+        }
+    }
+
+    /**
      * Cleanup and dispose of all effects
      */
     dispose() {

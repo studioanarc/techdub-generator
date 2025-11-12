@@ -93,31 +93,7 @@ class PresetManager {
 
     // Apply effects settings
     if (preset.effects) {
-      if (preset.effects.delay) {
-        this.effects.updateDelay(preset.effects.delay);
-      }
-      if (preset.effects.reverb) {
-        this.effects.updateReverb(preset.effects.reverb);
-      }
-      if (preset.effects.filter) {
-        this.effects.updateFilter(preset.effects.filter);
-      }
-      if (preset.effects.distortion) {
-        this.effects.updateDistortion(preset.effects.distortion);
-      }
-      if (preset.effects.bitCrusher) {
-        this.effects.updateBitCrusher(preset.effects.bitCrusher);
-      }
-      if (preset.effects.chorus) {
-        this.effects.updateChorus(preset.effects.chorus);
-      }
-      if (preset.effects.phaser) {
-        this.effects.updatePhaser(preset.effects.phaser);
-      }
-      if (preset.effects.convolver && preset.effects.convolver.ir) {
-        await this.effects.loadImpulseResponse(preset.effects.convolver.ir);
-        this.effects.updateConvolver({ wet: preset.effects.convolver.wet });
-      }
+      this.effects.applySettings(preset.effects);
     }
 
     // Apply synth settings
