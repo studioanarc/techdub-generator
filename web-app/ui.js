@@ -12,6 +12,7 @@ class DubTechnoUI {
 
     this.isPlaying = false;
     this.advancedMode = false;
+    this.audioInitialized = false; // Track if audio is initialized
 
     // Undo/redo
     this.history = [];
@@ -30,6 +31,23 @@ class DubTechnoUI {
   }
 
   async init() {
+    // Setup UI event listeners FIRST (before audio init)
+    this.setupEventListeners();
+
+    // Setup keyboard shortcuts
+    this.setupKeyboardShortcuts();
+
+    console.log('Dub Techno Generator UI ready - click Play to start audio');
+  }
+
+  async initAudio() {
+    if (this.audioInitialized) return;
+
+    console.log('Initializing audio engine...');
+
+    // Start Tone.js audio context
+    await Tone.start();
+
     // Initialize audio modules
     this.synths = new DubSynths();
     this.effects = new EffectsChain();
@@ -40,23 +58,17 @@ class DubTechnoUI {
     this.exporter = new AudioExporter(this.synths, this.effects, this.generators);
 
     // Connect synth master volume to effects chain
-    // (All synths are already connected to synths.masterVolume)
     const effectsInput = this.effects.getInput();
     this.synths.masterVolume.connect(effectsInput);
-
-    // Setup UI event listeners
-    this.setupEventListeners();
 
     // Load factory presets into UI
     this.loadFactoryPresetsUI();
 
     // Initialize with default preset
-    this.loadFactoryPreset('dark-minimal');
+    await this.loadFactoryPreset('dark-minimal');
 
-    // Setup keyboard shortcuts
-    this.setupKeyboardShortcuts();
-
-    console.log('Dub Techno Generator initialized');
+    this.audioInitialized = true;
+    console.log('Audio engine initialized successfully');
   }
 
   setupEventListeners() {
@@ -79,69 +91,71 @@ class DubTechnoUI {
 
     // Generator parameters
     this.bindParameter('tempo', (value) => {
-      this.generators.setTempo(parseFloat(value));
+      if (this.generators) this.generators.setTempo(parseFloat(value));
     });
 
     this.bindParameter('chaos', (value) => {
-      this.generators.setChaos(parseFloat(value));
+      if (this.generators) this.generators.setChaos(parseFloat(value));
     });
 
     this.bindParameter('bass-density', (value) => {
-      this.generators.setDensity('bass', parseFloat(value));
+      if (this.generators) this.generators.setDensity('bass', parseFloat(value));
     });
 
     this.bindParameter('pad-density', (value) => {
-      this.generators.setDensity('pad', parseFloat(value));
+      if (this.generators) this.generators.setDensity('pad', parseFloat(value));
     });
 
     this.bindParameter('stab-density', (value) => {
-      this.generators.setDensity('stab', parseFloat(value));
+      if (this.generators) this.generators.setDensity('stab', parseFloat(value));
     });
 
     this.bindParameter('hat-density', (value) => {
-      this.generators.setDensity('hat', parseFloat(value));
+      if (this.generators) this.generators.setDensity('hat', parseFloat(value));
     });
 
     this.bindParameter('kick-density', (value) => {
-      this.generators.setDensity('kick', parseFloat(value));
+      if (this.generators) this.generators.setDensity('kick', parseFloat(value));
     });
 
     // Scale selection
     const scaleSelect = document.getElementById('scale');
     if (scaleSelect) {
       scaleSelect.addEventListener('change', (e) => {
-        this.generators.setScale(e.target.value);
+        if (this.generators) this.generators.setScale(e.target.value);
       });
     }
 
     // Effects parameters
     this.bindParameter('delay-feedback', (value) => {
-      this.effects.setDelayFeedback(parseFloat(value));
+      if (this.effects) this.effects.setDelayFeedback(parseFloat(value));
     });
 
     this.bindParameter('delay-wet', (value) => {
-      this.effects.setDelayWet(parseFloat(value));
+      if (this.effects) this.effects.setDelayWet(parseFloat(value));
     });
 
     this.bindParameter('reverb-decay', (value) => {
-      this.effects.setReverbDecay(parseFloat(value));
+      if (this.effects) this.effects.setReverbDecay(parseFloat(value));
     });
 
     this.bindParameter('reverb-wet', (value) => {
-      this.effects.setReverbWet(parseFloat(value));
+      if (this.effects) this.effects.setReverbWet(parseFloat(value));
     });
 
     this.bindParameter('filter-cutoff', (value) => {
-      this.effects.setFilterFrequency(parseFloat(value));
+      if (this.effects) this.effects.setFilterFrequency(parseFloat(value));
     });
 
     this.bindParameter('distortion-amount', (value) => {
-      this.effects.setDistortionAmount(parseFloat(value));
+      if (this.effects) this.effects.setDistortionAmount(parseFloat(value));
     });
 
     this.bindParameter('master-volume', (value) => {
-      const db = parseFloat(value);
-      this.effects.setMasterVolume(db);
+      if (this.effects) {
+        const db = parseFloat(value);
+        this.effects.setMasterVolume(db);
+      }
     });
 
     // Preset controls
@@ -237,6 +251,30 @@ class DubTechnoUI {
   async play() {
     if (this.isPlaying) return;
 
+    // Initialize audio on first play
+    if (!this.audioInitialized) {
+      const playBtn = document.getElementById('play-btn');
+      if (playBtn) {
+        playBtn.textContent = 'Loading...';
+        playBtn.disabled = true;
+      }
+
+      try {
+        await this.initAudio();
+      } catch (error) {
+        console.error('Failed to initialize audio:', error);
+        if (playBtn) {
+          playBtn.textContent = 'Error';
+          playBtn.disabled = false;
+        }
+        return;
+      }
+
+      if (playBtn) {
+        playBtn.disabled = false;
+      }
+    }
+
     await this.generators.start();
     this.visualizer.start();
     this.isPlaying = true;
@@ -264,6 +302,10 @@ class DubTechnoUI {
 
   // Randomize
   randomize() {
+    if (!this.audioInitialized) {
+      console.warn('Audio not initialized yet. Click Play first.');
+      return;
+    }
     this.generators.randomize();
     this.updateUIFromState();
     this.saveToHistory();
