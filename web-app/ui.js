@@ -200,6 +200,22 @@ class DubTechnoUI {
       });
     }
 
+    // Spectral Freeze
+    const spectralFreezeToggle = document.getElementById('spectral-freeze-toggle');
+    if (spectralFreezeToggle) {
+      spectralFreezeToggle.addEventListener('change', (e) => {
+        if (this.effects) this.effects.setSpectralFreezeEnabled(e.target.checked);
+      });
+    }
+
+    // Spectral Freeze Active checkbox
+    const spectralFreezeActive = document.getElementById('spectral-freeze-active');
+    if (spectralFreezeActive) {
+      spectralFreezeActive.addEventListener('change', (e) => {
+        if (this.effects) this.effects.setSpectralFreezeActive(e.target.checked);
+      });
+    }
+
     // Convolution Reverb
     const convolutionReverbToggle = document.getElementById('convolution-reverb-toggle');
     if (convolutionReverbToggle) {
@@ -333,6 +349,19 @@ class DubTechnoUI {
 
     this.bindParameter('probability-delay-wet', (value) => {
       if (this.effects) this.effects.setProbabilityDelayWet(parseFloat(value));
+    });
+
+    // Spectral Freeze parameters
+    this.bindParameter('spectral-freeze-decay', (value) => {
+      if (this.effects) this.effects.setSpectralFreezeDecay(parseFloat(value));
+    });
+
+    this.bindParameter('spectral-freeze-filter', (value) => {
+      if (this.effects) this.effects.setSpectralFreezeFilter(parseFloat(value));
+    }, (value) => Math.round(value)); // Show as integer Hz
+
+    this.bindParameter('spectral-freeze-wet', (value) => {
+      if (this.effects) this.effects.setSpectralFreezeWet(parseFloat(value));
     });
 
     // Convolution Reverb parameters

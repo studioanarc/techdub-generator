@@ -107,6 +107,12 @@ class EffectsChain {
             this.effects.probabilityDelay = this.createProbabilityDelay();
             this.effects.probabilityDelay.connect(this.effects.delay);
 
+            // === SPECTRAL FREEZE (Novel Effect) ===
+
+            // Spectral Freeze - freeze audio in time for sustained textures
+            this.effects.spectralFreeze = this.createSpectralFreeze();
+            this.effects.spectralFreeze.connect(this.effects.probabilityDelay);
+
             // === REVERBS ===
 
             // Convolution Reverb - for realistic spaces
@@ -114,7 +120,7 @@ class EffectsChain {
                 decay: 8,
                 preDelay: 0.01,
                 wet: 0
-            }).connect(this.effects.probabilityDelay);
+            }).connect(this.effects.spectralFreeze);
 
             // Algorithmic Reverb - deep spacious atmosphere
             this.effects.reverb = new Tone.Reverb({
@@ -137,7 +143,7 @@ class EffectsChain {
             // Master Volume
             this.masterVolume = new Tone.Volume(-10).connect(this.effects.compressor);
 
-            console.log('✓ Effects chain initialized with 12 effects');
+            console.log('✓ Effects chain initialized with 13 effects');
             this.initialized = true;
 
             // Return the master volume as the input point for the chain
@@ -314,6 +320,60 @@ class EffectsChain {
 
         // Run at specified rate (converted to ms)
         components.intervalId = setInterval(updateInterval, 1000 / components.rate);
+    }
+
+    /**
+     * Create a spectral freeze effect that sustains audio
+     */
+    createSpectralFreeze() {
+        // Create crossfade for dry/wet mix
+        const freezeMix = new Tone.CrossFade(0);
+
+        // Create a long delay buffer for the freeze
+        const freezeDelay = new Tone.FeedbackDelay({
+            delayTime: 2, // 2 second buffer
+            feedback: 0, // Start with no feedback
+            wet: 1
+        });
+
+        // Add a filter to smooth the frozen sound
+        const freezeFilter = new Tone.Filter({
+            frequency: 2000,
+            type: "lowpass",
+            rolloff: -12
+        });
+        freezeDelay.connect(freezeFilter);
+        freezeFilter.connect(freezeMix.b);
+
+        // Add subtle chorus for the frozen signal to add movement
+        const freezeChorus = new Tone.Chorus({
+            frequency: 0.3,
+            delayTime: 3.5,
+            depth: 0.3,
+            type: "sine",
+            spread: 180
+        });
+        freezeFilter.connect(freezeChorus);
+        freezeChorus.connect(freezeMix.b);
+        freezeChorus.start();
+
+        // Create input node
+        const input = new Tone.Gain(1);
+        input.connect(freezeMix.a); // Dry signal
+        input.connect(freezeDelay);  // Wet signal (frozen)
+
+        // Store components for control
+        freezeMix._freezeComponents = {
+            input: input,
+            delay: freezeDelay,
+            filter: freezeFilter,
+            chorus: freezeChorus,
+            output: freezeMix,
+            isFrozen: false,
+            freezeDecay: 0.8 // Default decay rate when frozen
+        };
+
+        return input;
     }
 
     /**
@@ -697,6 +757,63 @@ class EffectsChain {
     setProbabilityDelayWet(value) {
         if (this.effects.probabilityDelay && this.effects.probabilityDelay._probabilityComponents) {
             const components = this.effects.probabilityDelay._probabilityComponents;
+            // Control wet/dry mix (0 = dry, 1 = wet)
+            components.output.fade.value = Math.max(0, Math.min(1, value));
+        }
+    }
+
+    /**
+     * Spectral Freeze controls
+     */
+    setSpectralFreezeEnabled(enabled) {
+        if (this.effects.spectralFreeze && this.effects.spectralFreeze._freezeComponents) {
+            const components = this.effects.spectralFreeze._freezeComponents;
+            // Control the crossfade between dry (0) and wet (1) signal
+            components.output.fade.value = enabled ? 0.5 : 0;
+        }
+    }
+
+    setSpectralFreezeActive(isActive) {
+        if (this.effects.spectralFreeze && this.effects.spectralFreeze._freezeComponents) {
+            const components = this.effects.spectralFreeze._freezeComponents;
+            components.isFrozen = isActive;
+
+            if (isActive) {
+                // Freeze: maximize feedback to sustain the buffer
+                components.delay.feedback.rampTo(components.freezeDecay, 0.1);
+            } else {
+                // Unfreeze: reduce feedback to allow new audio
+                components.delay.feedback.rampTo(0, 0.1);
+            }
+        }
+    }
+
+    setSpectralFreezeDecay(value) {
+        if (this.effects.spectralFreeze && this.effects.spectralFreeze._freezeComponents) {
+            const components = this.effects.spectralFreeze._freezeComponents;
+            // Clamp decay to 0.5-0.99 range (how long freeze sustains)
+            const decay = Math.max(0.5, Math.min(0.99, value));
+            components.freezeDecay = decay;
+
+            // If currently frozen, update feedback immediately
+            if (components.isFrozen) {
+                components.delay.feedback.rampTo(decay, 0.1);
+            }
+        }
+    }
+
+    setSpectralFreezeFilter(value) {
+        if (this.effects.spectralFreeze && this.effects.spectralFreeze._freezeComponents) {
+            const components = this.effects.spectralFreeze._freezeComponents;
+            // Clamp filter frequency to 200-8000 Hz
+            const freq = Math.max(200, Math.min(8000, value));
+            components.filter.frequency.rampTo(freq, 0.1);
+        }
+    }
+
+    setSpectralFreezeWet(value) {
+        if (this.effects.spectralFreeze && this.effects.spectralFreeze._freezeComponents) {
+            const components = this.effects.spectralFreeze._freezeComponents;
             // Control wet/dry mix (0 = dry, 1 = wet)
             components.output.fade.value = Math.max(0, Math.min(1, value));
         }

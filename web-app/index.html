@@ -390,6 +390,44 @@
             </div>
           </section>
 
+          <!-- Spectral Freeze -->
+          <section class="control-section effect-section">
+            <div class="effect-header">
+              <h2>Spectral Freeze</h2>
+              <label class="toggle-switch">
+                <input type="checkbox" id="spectral-freeze-toggle">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="control-group">
+              <label for="spectral-freeze-active">
+                <input type="checkbox" id="spectral-freeze-active" class="checkbox">
+                Freeze Active
+              </label>
+            </div>
+            <div class="control-group">
+              <label for="spectral-freeze-decay">
+                Decay
+                <span id="spectral-freeze-decay-value" class="value-display">0.80</span>
+              </label>
+              <input type="range" id="spectral-freeze-decay" min="0.5" max="0.99" step="0.01" value="0.8">
+            </div>
+            <div class="control-group">
+              <label for="spectral-freeze-filter">
+                Filter (Hz)
+                <span id="spectral-freeze-filter-value" class="value-display">2000</span>
+              </label>
+              <input type="range" id="spectral-freeze-filter" min="200" max="8000" step="100" value="2000">
+            </div>
+            <div class="control-group">
+              <label for="spectral-freeze-wet">
+                Wet
+                <span id="spectral-freeze-wet-value" class="value-display">0.50</span>
+              </label>
+              <input type="range" id="spectral-freeze-wet" min="0" max="1" step="0.01" value="0.5">
+            </div>
+          </section>
+
           <!-- Convolution Reverb -->
           <section class="control-section effect-section">
             <div class="effect-header">
