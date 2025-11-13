@@ -40,6 +40,7 @@ class EffectsChain {
                 spread: 180,
                 wet: 0
             }).connect(this.effects.distortion);
+            this.effects.chorus.stop(); // Stop internal LFO until enabled
 
             // Phaser - sweeping notches for movement
             this.effects.phaser = new Tone.Phaser({
@@ -50,6 +51,7 @@ class EffectsChain {
                 baseFrequency: 350,
                 wet: 0
             }).connect(this.effects.chorus);
+            this.effects.phaser.stop(); // Stop internal LFO until enabled
 
             // === FILTERS ===
 
@@ -67,6 +69,7 @@ class EffectsChain {
                 },
                 wet: 0
             }).connect(this.effects.phaser);
+            this.effects.filter.stop(); // Stop internal LFO until enabled
 
             // === GRANULAR PROCESSOR ===
 
@@ -570,6 +573,13 @@ class EffectsChain {
     setChorusEnabled(enabled) {
         if (this.effects.chorus) {
             this.effects.chorus.wet.value = enabled ? 0.5 : 0;
+
+            // Start/stop internal LFO
+            if (enabled) {
+                this.effects.chorus.start();
+            } else {
+                this.effects.chorus.stop();
+            }
         }
     }
 
@@ -591,6 +601,13 @@ class EffectsChain {
     setPhaserEnabled(enabled) {
         if (this.effects.phaser) {
             this.effects.phaser.wet.value = enabled ? 0.5 : 0;
+
+            // Start/stop internal LFO
+            if (enabled) {
+                this.effects.phaser.start();
+            } else {
+                this.effects.phaser.stop();
+            }
         }
     }
 
