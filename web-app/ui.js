@@ -49,23 +49,35 @@ class DubTechnoUI {
     console.log('Initializing audio engine...');
 
     // Start Tone.js audio context
+    console.log('Starting Tone.js...');
     await Tone.start();
+    console.log('Tone.js started');
 
     // Initialize audio modules
+    console.log('Creating synths...');
     this.synths = new DubSynths();
+    console.log('Creating effects...');
     this.effects = new EffectsChain();
+    console.log('Initializing effects chain...');
     this.effects.init(); // Initialize effects chain
+    console.log('Creating generators...');
     this.generators = new DubGenerators(this.synths, this.effects);
+    console.log('Creating visualizer...');
     this.visualizer = new DubVisualizer('visualizer');
+    console.log('Creating preset manager...');
     this.presetManager = new PresetManager(this.synths, this.effects, this.generators);
+    console.log('Creating audio exporter...');
     this.exporter = new AudioExporter(this.synths, this.effects, this.generators);
 
     // Connect synth master volume to effects chain
+    console.log('Connecting audio routing...');
     const effectsInput = this.effects.getInput();
     this.synths.masterVolume.connect(effectsInput);
 
     // Initialize with default preset
+    console.log('Loading default preset...');
     await this.loadFactoryPreset('dark-minimal');
+    console.log('Default preset loaded');
 
     this.audioInitialized = true;
     console.log('Audio engine initialized successfully');
