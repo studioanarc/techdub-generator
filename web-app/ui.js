@@ -579,10 +579,17 @@ class DubTechnoUI {
   // Factory presets
   loadFactoryPresetsUI() {
     const presetList = document.getElementById('factory-presets');
-    if (!presetList) return;
+    if (!presetList) {
+      console.warn('Factory presets container not found');
+      return;
+    }
+
+    // Clear existing content to prevent duplicates
+    presetList.innerHTML = '';
 
     // If presetManager doesn't exist yet, create placeholder buttons
     if (!this.presetManager) {
+      console.log('Loading factory preset buttons (before audio init)');
       // Static list of factory preset names (must match PresetManager)
       const factoryPresetNames = [
         { id: 'dark-minimal', name: 'Dark Minimal' },
@@ -599,10 +606,12 @@ class DubTechnoUI {
         btn.addEventListener('click', () => this.loadFactoryPreset(preset.id));
         presetList.appendChild(btn);
       });
+      console.log(`Created ${factoryPresetNames.length} factory preset buttons`);
       return;
     }
 
     // If presetManager exists, load from it
+    console.log('Loading factory presets from PresetManager');
     const names = this.presetManager.getFactoryPresetNames();
     names.forEach(name => {
       const btn = document.createElement('button');
@@ -611,6 +620,7 @@ class DubTechnoUI {
       btn.addEventListener('click', () => this.loadFactoryPreset(name));
       presetList.appendChild(btn);
     });
+    console.log(`Created ${names.length} factory preset buttons from PresetManager`);
   }
 
   async loadFactoryPreset(name) {
