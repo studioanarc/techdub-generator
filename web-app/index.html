@@ -127,6 +127,53 @@
           </section>
 
           <section class="control-section">
+            <div class="effect-header">
+              <h2>Arpeggiator</h2>
+              <label class="toggle-switch">
+                <input type="checkbox" id="arpeggiator-toggle">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="control-group">
+              <label for="arpeggiator-rate">Rate</label>
+              <select id="arpeggiator-rate">
+                <option value="8n">8th notes</option>
+                <option value="16n" selected>16th notes</option>
+                <option value="32n">32nd notes</option>
+                <option value="4n">Quarter notes</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label for="arpeggiator-pattern">Pattern</label>
+              <select id="arpeggiator-pattern">
+                <option value="up" selected>Up</option>
+                <option value="down">Down</option>
+                <option value="updown">Up-Down</option>
+                <option value="random">Random</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label for="arpeggiator-octaves">
+                Octaves
+                <span id="arpeggiator-octaves-value" class="value-display">2</span>
+              </label>
+              <input type="range" id="arpeggiator-octaves" min="1" max="4" step="1" value="2">
+            </div>
+
+            <div class="control-group">
+              <label for="arpeggiator-synth">Synth</label>
+              <select id="arpeggiator-synth">
+                <option value="bass">Bass</option>
+                <option value="pad">Pad</option>
+                <option value="stab" selected>Stab</option>
+              </select>
+            </div>
+          </section>
+
+          <section class="control-section">
             <h2>Master</h2>
 
             <div class="control-group">

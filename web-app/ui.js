@@ -126,6 +126,39 @@ class DubTechnoUI {
       });
     }
 
+    // Arpeggiator controls
+    const arpeggiatorToggle = document.getElementById('arpeggiator-toggle');
+    if (arpeggiatorToggle) {
+      arpeggiatorToggle.addEventListener('change', (e) => {
+        if (this.generators) this.generators.setArpeggiatorEnabled(e.target.checked);
+      });
+    }
+
+    const arpeggiatorRate = document.getElementById('arpeggiator-rate');
+    if (arpeggiatorRate) {
+      arpeggiatorRate.addEventListener('change', (e) => {
+        if (this.generators) this.generators.setArpeggiatorRate(e.target.value);
+      });
+    }
+
+    const arpeggiatorPattern = document.getElementById('arpeggiator-pattern');
+    if (arpeggiatorPattern) {
+      arpeggiatorPattern.addEventListener('change', (e) => {
+        if (this.generators) this.generators.setArpeggiatorPattern(e.target.value);
+      });
+    }
+
+    const arpeggiatorSynth = document.getElementById('arpeggiator-synth');
+    if (arpeggiatorSynth) {
+      arpeggiatorSynth.addEventListener('change', (e) => {
+        if (this.generators) this.generators.setArpeggiatorSynth(e.target.value);
+      });
+    }
+
+    this.bindParameter('arpeggiator-octaves', (value) => {
+      if (this.generators) this.generators.setArpeggiatorOctaves(parseFloat(value));
+    }, (value) => Math.round(value)); // Show as integer
+
     // === EFFECT TOGGLES ===
 
     // BitCrusher

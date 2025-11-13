@@ -26,6 +26,15 @@ class DubGenerators {
     this.chaos = 0.3; // Amount of randomness
     this.evolution = 0.5; // How much patterns evolve over time
 
+    // Arpeggiator settings
+    this.arpeggiator = {
+      enabled: false,
+      rate: '16n', // Note duration
+      pattern: 'up', // up, down, updown, random
+      octaves: 2, // Number of octaves to span
+      synth: 'stab' // Which synth to arpeggiate
+    };
+
     // Pattern memory for evolution
     this.patterns = {
       bass: [],
@@ -77,6 +86,32 @@ class DubGenerators {
     }
 
     return pattern;
+  }
+
+  // Generate arpeggio pattern
+  generateArpeggioNotes() {
+    const notes = [];
+    const baseOctave = 3;
+
+    // Generate notes across octaves
+    for (let oct = 0; oct < this.arpeggiator.octaves; oct++) {
+      for (let i = 0; i < this.scale.length; i++) {
+        notes.push(this.scale[i] + (baseOctave + oct));
+      }
+    }
+
+    // Apply pattern
+    switch (this.arpeggiator.pattern) {
+      case 'down':
+        return notes.reverse();
+      case 'updown':
+        return [...notes, ...notes.slice(1, -1).reverse()];
+      case 'random':
+        return notes.sort(() => Math.random() - 0.5);
+      case 'up':
+      default:
+        return notes;
+    }
   }
 
   // Initialize sequences
@@ -152,6 +187,22 @@ class DubGenerators {
         this.synths.synths.noise.triggerAttackRelease('1n', time);
       }
     }, Array.from({ length: 16 }, (_, i) => i), '16n');
+
+    // ARPEGGIATOR - Arpeggiated melodies
+    if (this.arpeggiator.enabled) {
+      const arpeggioNotes = this.generateArpeggioNotes();
+      const stepsPerNote = this.arpeggiator.rate;
+
+      this.sequences.arpeggiator = new Tone.Sequence((time, step) => {
+        const noteIndex = step % arpeggioNotes.length;
+        const note = arpeggioNotes[noteIndex];
+        const synth = this.synths.synths[this.arpeggiator.synth];
+
+        if (synth) {
+          synth.triggerAttackRelease(note, stepsPerNote, time);
+        }
+      }, Array.from({ length: arpeggioNotes.length }, (_, i) => i), stepsPerNote);
+    }
   }
 
   // Start playback
@@ -271,6 +322,52 @@ class DubGenerators {
     }
   }
 
+  // Arpeggiator controls
+  setArpeggiatorEnabled(enabled) {
+    this.arpeggiator.enabled = enabled;
+    if (this.isPlaying) {
+      this.stop();
+      this.start();
+    }
+  }
+
+  setArpeggiatorRate(rate) {
+    // rate should be a Tone.js time value like '16n', '8n', '4n'
+    this.arpeggiator.rate = rate;
+    if (this.isPlaying && this.arpeggiator.enabled) {
+      this.stop();
+      this.start();
+    }
+  }
+
+  setArpeggiatorPattern(pattern) {
+    // pattern: 'up', 'down', 'updown', 'random'
+    this.arpeggiator.pattern = pattern;
+    if (this.isPlaying && this.arpeggiator.enabled) {
+      this.stop();
+      this.start();
+    }
+  }
+
+  setArpeggiatorOctaves(octaves) {
+    this.arpeggiator.octaves = Math.max(1, Math.min(4, Math.round(octaves)));
+    if (this.isPlaying && this.arpeggiator.enabled) {
+      this.stop();
+      this.start();
+    }
+  }
+
+  setArpeggiatorSynth(synthName) {
+    // synthName: 'bass', 'pad', 'stab'
+    if (['bass', 'pad', 'stab'].includes(synthName)) {
+      this.arpeggiator.synth = synthName;
+      if (this.isPlaying && this.arpeggiator.enabled) {
+        this.stop();
+        this.start();
+      }
+    }
+  }
+
   // Get current settings
   getSettings() {
     return {
@@ -279,7 +376,8 @@ class DubGenerators {
       tempo: this.tempo,
       density: { ...this.density },
       chaos: this.chaos,
-      evolution: this.evolution
+      evolution: this.evolution,
+      arpeggiator: { ...this.arpeggiator }
     };
   }
 
