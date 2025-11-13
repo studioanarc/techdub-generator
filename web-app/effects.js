@@ -51,7 +51,7 @@ class EffectsChain {
                 baseFrequency: 350,
                 wet: 0
             }).connect(this.effects.chorus);
-            this.effects.phaser.stop(); // Stop internal LFO until enabled
+            // Note: Phaser doesn't have .start()/.stop() methods
 
             // === FILTERS ===
 
@@ -601,13 +601,7 @@ class EffectsChain {
     setPhaserEnabled(enabled) {
         if (this.effects.phaser) {
             this.effects.phaser.wet.value = enabled ? 0.5 : 0;
-
-            // Start/stop internal LFO
-            if (enabled) {
-                this.effects.phaser.start();
-            } else {
-                this.effects.phaser.stop();
-            }
+            // Note: Phaser doesn't have internal LFOs to start/stop
         }
     }
 
