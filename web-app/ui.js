@@ -554,7 +554,8 @@ class DubTechnoUI {
     }
 
     await this.generators.start();
-    this.visualizer.start();
+    // Disable visualizer for performance - it's very CPU intensive
+    // this.visualizer.start();
     this.isPlaying = true;
 
     const playBtn = document.getElementById('play-btn');
@@ -568,7 +569,8 @@ class DubTechnoUI {
     if (!this.isPlaying) return;
 
     this.generators.stop();
-    this.visualizer.stop();
+    // Visualizer disabled for performance
+    // this.visualizer.stop();
     this.isPlaying = false;
 
     const playBtn = document.getElementById('play-btn');
