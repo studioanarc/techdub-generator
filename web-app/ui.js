@@ -74,13 +74,14 @@ class DubTechnoUI {
     const effectsInput = this.effects.getInput();
     this.synths.masterVolume.connect(effectsInput);
 
+    // Mark as initialized BEFORE loading preset to avoid infinite loop
+    this.audioInitialized = true;
+    console.log('Audio engine initialized successfully');
+
     // Initialize with default preset
     console.log('Loading default preset...');
     await this.loadFactoryPreset('dark-minimal');
     console.log('Default preset loaded');
-
-    this.audioInitialized = true;
-    console.log('Audio engine initialized successfully');
   }
 
   setupEventListeners() {
