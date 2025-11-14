@@ -48,15 +48,15 @@ class DubTechnoUI {
 
     console.log('Initializing audio engine...');
 
-    // Configure Tone.js for lower-power CPU with higher latency for stability
-    console.log('Configuring Tone.js context...');
-    Tone.context.latencyHint = 'playback'; // Higher latency = less CPU usage
-    Tone.context.lookAhead = 0.1; // Reduce lookahead
-
     // Start Tone.js audio context
     console.log('Starting Tone.js...');
     await Tone.start();
     console.log('Tone.js started');
+
+    // Optimize Tone.js for lower-power CPU
+    console.log('Optimizing audio context for performance...');
+    Tone.context.lookAhead = 0.05; // Reduce lookahead for less CPU
+    console.log(`Context latency: ${Tone.context.latencyHint}, lookAhead: ${Tone.context.lookAhead}`);
 
     // Initialize audio modules
     console.log('Creating synths...');
