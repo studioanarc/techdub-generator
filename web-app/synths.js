@@ -40,6 +40,7 @@ class DubSynths {
 
     // PAD SYNTH - Atmospheric pad for chords
     this.synths.pad = new Tone.PolySynth(Tone.Synth, {
+      maxPolyphony: 4, // Limit voices to prevent performance issues
       oscillator: {
         type: 'sawtooth',
         partials: [1, 0.5, 0.3, 0.2]
@@ -70,6 +71,7 @@ class DubSynths {
 
     // STAB SYNTH - Chord stabs
     this.synths.stab = new Tone.PolySynth(Tone.Synth, {
+      maxPolyphony: 3, // Limit voices to prevent performance issues
       oscillator: {
         type: 'square'
       },

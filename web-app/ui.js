@@ -608,10 +608,10 @@ class DubTechnoUI {
       // Static list of factory preset names (must match PresetManager)
       const factoryPresetNames = [
         { id: 'dark-minimal', name: 'Dark Minimal' },
-        { id: 'deep-dub', name: 'Deep Dub' },
-        { id: 'rhythm-sound', name: 'Rhythm & Sound' },
-        { id: 'andy-stott', name: 'Andy Stott' },
-        { id: 'basic-channel', name: 'Basic Channel' }
+        { id: 'industrial', name: 'Industrial' },
+        { id: 'bladerunner', name: 'Bladerunner' },
+        { id: 'rhythm-and-sound', name: 'Rhythm & Sound' },
+        { id: 'andy-stott', name: 'Andy Stott' }
       ];
 
       factoryPresetNames.forEach(preset => {

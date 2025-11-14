@@ -13,14 +13,14 @@ class DubGenerators {
     this.scale = ['C', 'D', 'Eb', 'F', 'G', 'Ab', 'Bb']; // C minor
     this.tempo = 120;
 
-    // Generative parameters (reduced for better performance)
+    // Generative parameters (MINIMAL TEST - only kick enabled)
     this.density = {
-      bass: 0.4,
-      pad: 0.2,
-      stab: 0.2,
+      bass: 0.0,
+      pad: 0.0,
+      stab: 0.0,
       kick: 1.0,
-      hat: 0.4,
-      noise: 0.1
+      hat: 0.0,
+      noise: 0.0
     };
 
     this.chaos = 0.3; // Amount of randomness
