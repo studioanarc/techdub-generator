@@ -48,6 +48,11 @@ class DubTechnoUI {
 
     console.log('Initializing audio engine...');
 
+    // Configure Tone.js for lower-power CPU with higher latency for stability
+    console.log('Configuring Tone.js context...');
+    Tone.context.latencyHint = 'playback'; // Higher latency = less CPU usage
+    Tone.context.lookAhead = 0.1; // Reduce lookahead
+
     // Start Tone.js audio context
     console.log('Starting Tone.js...');
     await Tone.start();
@@ -69,10 +74,13 @@ class DubTechnoUI {
     console.log('Creating audio exporter...');
     this.exporter = new AudioExporter(this.synths, this.effects, this.generators);
 
-    // Connect synth master volume to effects chain
-    console.log('Connecting audio routing...');
-    const effectsInput = this.effects.getInput();
-    this.synths.masterVolume.connect(effectsInput);
+    // MINIMAL TEST: Bypass effects chain entirely - connect directly to destination
+    console.log('Connecting audio routing (BYPASSING EFFECTS FOR TESTING)...');
+    this.synths.masterVolume.toDestination();
+
+    // Don't connect to effects for minimal test
+    // const effectsInput = this.effects.getInput();
+    // this.synths.masterVolume.connect(effectsInput);
 
     // Mark as initialized BEFORE loading preset to avoid infinite loop
     this.audioInitialized = true;

@@ -118,9 +118,21 @@ class DubGenerators {
   initSequences() {
     Tone.Transport.bpm.value = this.tempo;
 
+    // Pre-calculate patterns to avoid recalculation on every step
+    const kickPattern = this.euclidean(16, 4);
+    const hatPattern = this.euclidean(16, Math.floor(this.density.hat * 12));
+
+    // Diagnostic: count sequence calls
+    let kickCallCount = 0;
+
     // KICK - Steady 4/4 with occasional variations
     this.sequences.kick = new Tone.Sequence((time, step) => {
-      const kickPattern = this.euclidean(16, 4);
+      kickCallCount++;
+      if (kickCallCount <= 20) {
+        console.log(`Kick sequence callback #${kickCallCount}, step: ${step}, time: ${time.toFixed(3)}`);
+      } else if (kickCallCount === 21) {
+        console.log('Kick sequence callback logging stopped (20 calls reached)');
+      }
 
       if (kickPattern[step % 16] || (this.shouldTrigger(this.chaos * 0.2) && step % 4 !== 0)) {
         this.synths.synths.kick.triggerAttackRelease('C1', '8n', time);
@@ -174,8 +186,6 @@ class DubGenerators {
 
     // HAT - Euclidean hi-hat pattern
     this.sequences.hat = new Tone.Sequence((time, step) => {
-      const hatPattern = this.euclidean(16, Math.floor(this.density.hat * 12));
-
       if (hatPattern[step % 16]) {
         this.synths.synths.hat.triggerAttackRelease('16n', time);
       }
