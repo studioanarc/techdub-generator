@@ -224,13 +224,20 @@ class DubGenerators {
   stop() {
     if (!this.isPlaying) return;
 
-    Tone.Transport.stop();
-
-    // Stop and dispose sequences
+    // Stop and dispose sequences BEFORE stopping transport
+    // This prevents negative time values from floating-point errors
     Object.values(this.sequences).forEach(seq => {
-      seq.stop();
-      seq.dispose();
+      try {
+        seq.stop(0); // Explicitly pass time 0
+        seq.dispose();
+      } catch (error) {
+        console.warn('Error stopping sequence:', error);
+        // Continue cleanup even if one sequence fails
+      }
     });
+
+    Tone.Transport.stop();
+    Tone.Transport.cancel(0); // Cancel all scheduled events
 
     this.sequences = {};
     this.isPlaying = false;
